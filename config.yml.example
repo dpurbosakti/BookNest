@@ -1,0 +1,23 @@
+name: BookNest
+version: 0.0.1
+
+httpConf:
+  host: localhost
+  port: 8080
+
+dbConf:
+  host: localhost
+  port: 5432
+  user: root
+  password: root
+  databasename: postgres
+  maxOpenConns: 5
+  maxIdleConns: 5
+  maxIdleTime: 100
+  dialect: postgres
+
+emailConf:
+  email: example@gmail.com
+  password: example
+  host: example.gmail.com
+  port: 888

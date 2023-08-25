@@ -1,7 +1,12 @@
 package main
 
-import "book-nest/app"
+import (
+	"book-nest/app"
+	"log"
+)
 
 func main() {
-	app.Execute()
+	if err := app.Execute(); err != nil {
+		log.Fatal(err)
+	}
 }

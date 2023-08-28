@@ -2,6 +2,7 @@ package app
 
 import (
 	"book-nest/config"
+	"book-nest/internal/http"
 	"book-nest/migration"
 
 	"github.com/sirupsen/logrus"
@@ -13,12 +14,14 @@ func init() {
 	cobra.OnInitialize(initProject)
 
 	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(serveCmd)
 
 }
 
 func initProject() {
 	Config = config.GetConfig()
 	DB = config.InitDb(&Config)
+	server = http.Serve
 }
 
 var (
@@ -30,9 +33,15 @@ var (
 		Run: migrate,
 	}
 
+	serveCmd = &cobra.Command{
+		Use: "serve",
+		Run: serve,
+	}
+
 	// global variable
 	DB     *gorm.DB
 	Config config.Config
+	server http.Server
 )
 
 func migrate(cmd *cobra.Command, args []string) {
@@ -44,6 +53,17 @@ func migrate(cmd *cobra.Command, args []string) {
 	// 	logger.WithError(err).Error("error where running migration")
 	// 	panic(err)
 	// }
+	logger.Info("done")
+}
+
+func serve(cmd *cobra.Command, args []string) {
+	logger := logrus.WithField("func", "serve")
+	logger.Info("serve")
+	err := server(DB)
+	if err != nil {
+		logger.WithError(err).Error("error where running migration")
+		panic(err)
+	}
 	logger.Info("done")
 }
 

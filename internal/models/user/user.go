@@ -13,6 +13,7 @@ type User struct {
 	Email            string         `json:"email" gorm:"type:varchar(250);not null"`
 	Password         string         `json:"password" gorm:"type:varchar(250);not null"`
 	Phone            string         `json:"phone" gorm:"type:varchar(20);not null"`
+	Address          string         `json:"address" gorm:"type:varchar(250);not null"`
 	Role             string         `json:"role" gorm:"default:user"`
 	VerificationCode string         `json:"verificationCode"` //verification code
 	IsVerified       bool           `json:"isVerified"`

@@ -32,3 +32,11 @@ Before you begin, ensure you have met the following requirements:
    go run . migrate
 
    ```
+
+## Run The App
+
+To run the app you need to run this following command
+```sh
+go run . serve
+```
+**Note:** When running the application using the `go run . serve` command, make sure you are in the root directory of the cloned repository. This is the directory where the `main.go` file is located. Running the command from this directory ensures that the application is correctly started and served.

@@ -1,6 +1,8 @@
 package http
 
 import (
+	"book-nest/internal/handlers"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
@@ -15,6 +17,9 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	ur := userRepo.NewUserRepository()
 	us := userSrv.NewUserService(ur, db)
 	uh := userHdl.NewUserHandler(us)
+
+	// ping
+	r.GET("/ping", handlers.Ping)
 
 	// user
 	userGroup := r.Group("/users")

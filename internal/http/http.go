@@ -1,6 +1,7 @@
 package http
 
 import (
+	"book-nest/validators"
 	"context"
 	"fmt"
 	"net/http"
@@ -10,6 +11,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -20,6 +23,11 @@ func Serve(db *gorm.DB, port string) {
 	gin.ForceConsoleColor()
 	r := gin.New()
 	r.Use(gin.Logger())
+
+	// register custom validation
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("phone", validators.PhoneNumberValidator)
+	}
 
 	InitRouter(r, db)
 	port = fmt.Sprintf(":%s", port)

@@ -2,6 +2,7 @@ package user
 
 import (
 	"book-nest/internal/models/user"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -25,4 +26,23 @@ func (repo *UserRepository) Create(tx *gorm.DB, input user.User) (user.User, err
 	}
 
 	return input, nil
+}
+
+func (repo *UserRepository) CheckDuplicate(tx *gorm.DB, input user.User) error {
+	var count int64
+	if resultEmail := tx.Model(&user.User{}).Where("email = $1 ", input.Email).Count(&count); resultEmail.Error != nil {
+		return errors.New("error checking email")
+	}
+	if count > 0 {
+		return errors.New("email already exists in database")
+	}
+
+	if resultPhone := tx.Model(&user.User{}).Where("phone = $1 ", input.Phone).Count(&count); resultPhone.Error != nil {
+		return errors.New("error checking phone")
+	}
+	if count > 0 {
+		return errors.New("phone already exists in database")
+	}
+
+	return nil
 }

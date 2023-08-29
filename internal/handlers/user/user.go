@@ -18,15 +18,15 @@ func NewUserHandler(userService mu.UserService) *UserHandler {
 
 func (hdl *UserHandler) Create(c *gin.Context) {
 	userReq := mu.UserCreateRequest{}
-	err := c.Bind(&userReq)
+	err := c.ShouldBindJSON(&userReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 	result, errCreate := hdl.userService.Create(userReq)
 
 	if errCreate != nil {
-		c.JSON(http.StatusInternalServerError, errCreate)
+		c.JSON(http.StatusInternalServerError, errCreate.Error())
 		return
 	}
 

@@ -21,6 +21,7 @@ func init() {
 func initProject() {
 	Config = config.GetConfig()
 	DB = config.InitDb(&Config)
+	// validators.InitValidator()
 	server = http.Serve
 }
 

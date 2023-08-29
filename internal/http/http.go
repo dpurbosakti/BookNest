@@ -1,6 +1,7 @@
 package http
 
 import (
+	"book-nest/internal/middlewares"
 	"book-nest/validators"
 	"context"
 	"fmt"
@@ -22,7 +23,7 @@ type Server func(db *gorm.DB, port string)
 func Serve(db *gorm.DB, port string) {
 	gin.ForceConsoleColor()
 	r := gin.New()
-	r.Use(gin.Logger())
+	r.Use(middlewares.CustomLogger())
 
 	// register custom validation
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {

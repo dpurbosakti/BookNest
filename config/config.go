@@ -9,7 +9,7 @@ import (
 
 type HttpConf struct {
 	Host string
-	Port int
+	Port string
 }
 
 type EmailConf struct {
@@ -28,13 +28,8 @@ type Config struct {
 
 func GetConfig() Config {
 	var cfg *Config
-	// main viper config
-	// viper.SetConfigName("config")
-	// viper.SetConfigType("yml")
-	// viper.AddConfigPath(".")
-	// viper.AutomaticEnv()
-	viper.SetConfigFile("D:/Belajar/BE/Moko/BookNest/config.yml") // windows
-	// viper.SetConfigFile("/mnt/d/Belajar/BE/learnEcho2/config.yml") // linux
+
+	viper.SetConfigFile("config.yml")
 	// default values
 	viper.SetDefault("FullName", "mokotest")
 	viper.SetDefault("Version", "0.0.1")

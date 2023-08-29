@@ -2,6 +2,7 @@ package user
 
 import (
 	mu "book-nest/internal/models/user"
+	ph "book-nest/utils/passwordhelper"
 
 	"gorm.io/gorm"
 )
@@ -18,27 +19,28 @@ func NewUserService(userRepository mu.UserRepository, db *gorm.DB) mu.UserServic
 	}
 }
 
-func (srv *UserService) Create(input mu.UserCreateRequest) (result mu.UserResponse, err error) {
+func (srv *UserService) Create(input mu.UserCreateRequest) (mu.UserResponse, error) {
 	// var errChan = make(chan error)
-	// hashPassword, errHash := ph.HashPassword(input.Password)
-	// if errHash != nil {
-	// 	return result, errHash
-	// }
-	// input.Password = hashPassword
-	// data := createRequestToModel(input)
-	// verCode, _ := generateVerCode(6)
-	// data.IsVerified = false
-	// data.VerCode = verCode
-	err = srv.DB.Transaction(func(tx *gorm.DB) error {
+	var result mu.UserResponse
+	hashPassword, errHash := ph.HashPassword(input.Password)
+	if errHash != nil {
+		return result, errHash
+	}
+	input.Password = hashPassword
+	data := requestToModel(input)
+	verificationCode, _ := generateVerCode(6)
+	data.IsVerified = false
+	data.VerificationCode = verificationCode
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		// err := srv.UserRepository.CheckDuplicate(tx, data)
 		// if err != nil {
 		// 	return err
 		// }
-		// resultRepo, err := srv.UserRepository.Create(tx, data)
-		// if err != nil {
-		// 	return err
-		// }
-		// result = modelToResponse(resultRepo)
+		resultRepo, err := srv.UserRepository.Create(tx, data)
+		if err != nil {
+			return err
+		}
+		result = modelToResponse(resultRepo)
 
 		// err = eh.SendEmailVerCode(data)
 		// if err != nil {

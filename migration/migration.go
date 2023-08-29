@@ -2,13 +2,13 @@ package migration
 
 import (
 	"book-nest/internal/models/user"
-	"log"
 
 	"gorm.io/gorm"
 )
 
-func Migrate(db *gorm.DB) {
+func Migrate(db *gorm.DB) error {
 	if err := db.AutoMigrate(&user.User{}); err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }

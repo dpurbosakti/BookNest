@@ -21,7 +21,7 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	// ping
 	r.GET("/ping", handlers.Ping)
 
-	// user
+	// users
 	userGroup := r.Group("/users")
 	userGroup.POST("", uh.Create)
 }

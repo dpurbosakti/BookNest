@@ -13,7 +13,7 @@ func NewUserRepository() user.UserRepository {
 	return &UserRepository{}
 }
 
-func (repo *UserRepository) Create(tx *gorm.DB, input user.User) (row int, err error) {
+func (repo *UserRepository) Create(tx *gorm.DB, input user.User) (user.User, error) {
 	// passwordHashed, errorHash := _bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	// if errorHash != nil {
 	// 	fmt.Println("Error hash", errorHash.Error())
@@ -21,8 +21,8 @@ func (repo *UserRepository) Create(tx *gorm.DB, input user.User) (row int, err e
 	// user.Password = string(passwordHashed)
 	resultcreate := tx.Create(&input)
 	if resultcreate.Error != nil {
-		return 0, resultcreate.Error
+		return user.User{}, resultcreate.Error
 	}
 
-	return int(resultcreate.RowsAffected), nil
+	return input, nil
 }

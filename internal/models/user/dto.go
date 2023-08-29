@@ -19,11 +19,10 @@ type UserResponse struct {
 	Id               uuid.UUID      `json:"id"`
 	Name             string         `json:"name"`
 	Email            string         `json:"email"`
-	Password         string         `json:"password"`
 	Phone            string         `json:"phone"`
 	Address          string         `json:"address"`
 	Role             string         `json:"role"`
-	VerificationCode string         `json:"verificationCode"` //verification code
+	VerificationCode string         `json:"verificationCode"`
 	IsVerified       bool           `json:"isVerified"`
 	CreatedAt        time.Time      `json:"createdAt"`
 	UpdatedAt        time.Time      `json:"updatedAt"`

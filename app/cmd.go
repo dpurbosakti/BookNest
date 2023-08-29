@@ -47,23 +47,18 @@ var (
 func migrate(cmd *cobra.Command, args []string) {
 	logger := logrus.WithField("func", "migrate")
 	logger.Info("start migration")
-	migration.Migrate(DB)
-	// err := migrator()
-	// if err != nil {
-	// 	logger.WithError(err).Error("error where running migration")
-	// 	panic(err)
-	// }
+	err := migration.Migrate(DB)
+	if err != nil {
+		logger.WithError(err).Error("error where running migration")
+		panic(err)
+	}
 	logger.Info("done")
 }
 
 func serve(cmd *cobra.Command, args []string) {
 	logger := logrus.WithField("func", "serve")
 	logger.Info("serve")
-	err := server(DB)
-	if err != nil {
-		logger.WithError(err).Error("error where running migration")
-		panic(err)
-	}
+	server(DB, Config.HttpConf.Port)
 	logger.Info("done")
 }
 

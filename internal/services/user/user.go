@@ -2,7 +2,9 @@ package user
 
 import (
 	mu "book-nest/internal/models/user"
+	eh "book-nest/utils/emailhelper"
 	ph "book-nest/utils/passwordhelper"
+	"errors"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -11,12 +13,14 @@ import (
 type UserService struct {
 	UserRepository mu.UserRepository
 	DB             *gorm.DB
+	EmailHelper    eh.Emailer
 }
 
-func NewUserService(userRepository mu.UserRepository, db *gorm.DB) mu.UserService {
+func NewUserService(userRepository mu.UserRepository, db *gorm.DB, emailer eh.Emailer) mu.UserService {
 	return &UserService{
 		UserRepository: userRepository,
 		DB:             db,
+		EmailHelper:    emailer,
 	}
 }
 
@@ -56,6 +60,9 @@ func (srv *UserService) Create(input mu.UserCreateRequest) (mu.UserResponse, err
 		// if err != nil {
 		// 	return errors.New("failed to send email verification code: " + err.Error())
 		// }
+		if err := srv.EmailHelper.SendEmail(data.Email); err != nil {
+			return errors.New("failed to send email: " + err.Error())
+		}
 		logger.WithField("data", data).Info("end of db transaction")
 		return nil
 	})

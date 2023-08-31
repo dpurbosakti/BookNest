@@ -2,6 +2,7 @@ package http
 
 import (
 	"book-nest/internal/handlers"
+	eh "book-nest/utils/emailhelper"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -13,9 +14,11 @@ import (
 )
 
 func InitRouter(r *gin.Engine, db *gorm.DB) {
+	// emailhelper
+	email := eh.NewEmailHelper()
 	// users
 	ur := userRepo.NewUserRepository()
-	us := userSrv.NewUserService(ur, db)
+	us := userSrv.NewUserService(ur, db, email)
 	uh := userHdl.NewUserHandler(us)
 
 	// ping

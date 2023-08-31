@@ -26,35 +26,36 @@ type Config struct {
 	LoggerConf *logrus.Logger
 }
 
-func GetConfig() Config {
-	var cfg *Config
+var Cfg *Config
 
-	viper.SetConfigFile("config.yml")
-	// default values
-	viper.SetDefault("FullName", "mokotest")
-	viper.SetDefault("Version", "0.0.1")
-	viper.SetDefault("HttpConf.Host", "127.0.0.1")
-	viper.SetDefault("HttpConf.Port", "8000")
+func GetConfig() {
+	if Cfg == nil {
+		viper.SetConfigFile("config.yml")
+		// default values
+		viper.SetDefault("FullName", "mokotest")
+		viper.SetDefault("Version", "0.0.1")
+		viper.SetDefault("HttpConf.Host", "127.0.0.1")
+		viper.SetDefault("HttpConf.Port", "8000")
 
-	// read the file
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file, %s", err)
-		panic(err)
+		// read the file
+		if err := viper.ReadInConfig(); err != nil {
+			fmt.Printf("Error reading config file, %s", err)
+			panic(err)
+		}
+
+		// map to app
+		if err := viper.Unmarshal(&Cfg); err != nil {
+			fmt.Printf("Unable to decode into struct, %v", err)
+			panic(err)
+
+		}
+
+		// done
+		logrus.WithFields(logrus.Fields{
+			"source":  "config",
+			"status":  "done",
+			"message": "config is loaded successfully",
+		}).Info("loading config")
 	}
 
-	// map to app
-	if err := viper.Unmarshal(&cfg); err != nil {
-		fmt.Printf("Unable to decode into struct, %v", err)
-		panic(err)
-
-	}
-
-	// done
-	logrus.WithFields(logrus.Fields{
-		"source":  "config",
-		"status":  "done",
-		"message": "config is loaded successfully",
-	}).Info("loading config")
-
-	return *cfg
 }

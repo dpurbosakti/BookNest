@@ -21,9 +21,9 @@ type DbConf struct {
 	Dialect      string
 }
 
-func InitDb(c *Config) (DB *gorm.DB) {
+func InitDb() (DB *gorm.DB) {
 	logger := logrus.WithField("configuring db", "initiate db")
-	if c.DbConf.Dialect != "mysql" && c.DbConf.Dialect != "postgres" {
+	if Cfg.DbConf.Dialect != "mysql" && Cfg.DbConf.Dialect != "postgres" {
 		logger.WithFields(logrus.Fields{
 			"type":    "db",
 			"source":  "gorm",
@@ -33,11 +33,11 @@ func InitDb(c *Config) (DB *gorm.DB) {
 		return
 	}
 	var gormD gorm.Dialector
-	if c.DbConf.Dialect == "mysql" {
-		gormD = mysql.Open(mysqlDsnBuilder(c.DbConf))
-		logger.WithField("dsn", mysqlDsnBuilder(c.DbConf)).Info()
-	} else if c.DbConf.Dialect == "postgres" {
-		gormD = postgres.Open(postgresDsnBuilder(c.DbConf))
+	if Cfg.DbConf.Dialect == "mysql" {
+		gormD = mysql.Open(mysqlDsnBuilder(Cfg.DbConf))
+		logger.WithField("dsn", mysqlDsnBuilder(Cfg.DbConf)).Info()
+	} else if Cfg.DbConf.Dialect == "postgres" {
+		gormD = postgres.Open(postgresDsnBuilder(Cfg.DbConf))
 	}
 
 	db, err := gorm.Open(gormD, &gorm.Config{})
@@ -62,9 +62,9 @@ func InitDb(c *Config) (DB *gorm.DB) {
 }
 
 func mysqlDsnBuilder(c DbConf) string {
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", c.User, c.Password, c.Host, c.Port, c.DataBaseName)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", Cfg.DbConf.User, Cfg.DbConf.Password, Cfg.DbConf.Host, Cfg.DbConf.Port, Cfg.DbConf.DataBaseName)
 }
 
 func postgresDsnBuilder(c DbConf) string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta", c.Host, c.Port, c.User, c.Password, c.DataBaseName)
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Jakarta", Cfg.DbConf.Host, Cfg.DbConf.Port, Cfg.DbConf.User, Cfg.DbConf.Password, Cfg.DbConf.DataBaseName)
 }

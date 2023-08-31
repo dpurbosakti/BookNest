@@ -19,9 +19,8 @@ func init() {
 }
 
 func initProject() {
-	Config = config.GetConfig()
-	DB = config.InitDb(&Config)
-	// validators.InitValidator()
+	config.GetConfig()
+	DB = config.InitDb()
 	server = http.Serve
 }
 
@@ -41,7 +40,7 @@ var (
 
 	// global variable
 	DB     *gorm.DB
-	Config config.Config
+	Config *config.Config
 	server http.Server
 )
 
@@ -59,7 +58,7 @@ func migrate(cmd *cobra.Command, args []string) {
 func serve(cmd *cobra.Command, args []string) {
 	logger := logrus.WithField("func", "serve")
 	logger.Info("serve")
-	server(DB, Config.HttpConf.Port)
+	server(DB, config.Cfg.HttpConf.Port)
 	logger.Info("done")
 }
 

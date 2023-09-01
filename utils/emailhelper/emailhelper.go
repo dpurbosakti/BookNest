@@ -2,6 +2,7 @@ package emailhelper
 
 import (
 	"book-nest/config"
+	"book-nest/internal/models/user"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -9,7 +10,7 @@ import (
 )
 
 type Emailer interface {
-	SendEmail(emailUser string) error
+	SendEmailVerificationCode(user user.User) error
 }
 
 type EmailHelper struct {
@@ -25,19 +26,37 @@ func NewEmailHelper() *EmailHelper {
 	}
 }
 
-func (e *EmailHelper) SendEmail(emailUser string) error {
+const verificationCodeHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verification Code</title>
+</head>
+<body>
+    <p>This is your verification code: %s</p>
+</body>
+</html>
+`
+
+func parseTemplate(verificationCode string) string {
+	return fmt.Sprintf(verificationCodeHTML, verificationCode)
+}
+
+func (e *EmailHelper) SendEmailVerificationCode(user user.User) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", e.Email)
-	message.SetHeader("To", emailUser)
-	message.SetHeader("Subject", "Test Email")
+	message.SetHeader("To", user.Email)
+	message.SetHeader("Subject", "Verification Code Email")
+	message.SetBody("text/html", parseTemplate(user.VerificationCode))
 	logger := logrus.WithFields(logrus.Fields{
-		"func": "SendEmail",
-		"to":   emailUser,
+		"func": "SendEmailVerificationCode",
+		"to":   user.Email,
 	})
 
 	if err := e.Dialer.DialAndSend(message); err != nil {
 		logger.Error(err)
-		return fmt.Errorf("failed when sending email to %s, err: %w", emailUser, err)
+		return fmt.Errorf("failed when sending email to %s, err: %w", user.Email, err)
 	}
+	logger.Info("email sent...")
 	return nil
 }

@@ -60,7 +60,7 @@ func (srv *UserService) Create(input mu.UserCreateRequest) (mu.UserResponse, err
 		// if err != nil {
 		// 	return errors.New("failed to send email verification code: " + err.Error())
 		// }
-		if err := srv.EmailHelper.SendEmail(data.Email); err != nil {
+		if err := srv.EmailHelper.SendEmailVerificationCode(data); err != nil {
 			return errors.New("failed to send email: " + err.Error())
 		}
 		logger.WithField("data", data).Info("end of db transaction")

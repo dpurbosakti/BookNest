@@ -6,6 +6,7 @@ import (
 	hh "book-nest/utils/handlerhelper"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,12 +15,16 @@ import (
 )
 
 type AuthHandler struct {
-	GoogleConf *oauth2.Config
+	GoogleConf  *oauth2.Config
+	TwitterConf *oauth2.Config
+	GithubConf  *oauth2.Config
 }
 
 func NewAuthHandler() ma.AuthHandler {
 	return &AuthHandler{
-		GoogleConf: config.GetGoogleConfig(),
+		GoogleConf:  config.GetGoogleConfig(),
+		TwitterConf: config.GetTwitterConfig(),
+		GithubConf:  config.GetGithubConfig(),
 	}
 }
 
@@ -57,13 +62,159 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 		logger.WithError(err).Error("failed to exchange code into token")
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
 	}
+	if token == nil {
+		logger.WithError(err).Error("failed to get token")
+		c.JSON(http.StatusInternalServerError, err.Error())
+	} else {
+		// use google api to get user info
+		resp, err := http.Get(config.Cfg.GoogleConf.TokenAccessUrl + token.AccessToken)
 
-	// use google api to get user info
-	resp, err := http.Get(config.Cfg.GoogleConf.TokenAccessUrl + token.AccessToken)
+		if err != nil {
+			logger.WithError(err).Error("failed to get user info")
+			c.JSON(http.StatusUnprocessableEntity, err.Error())
+			return
+		}
+		defer resp.Body.Close()
 
+		if resp.StatusCode != http.StatusOK {
+			logger.Error("non-OK status code received")
+			c.JSON(resp.StatusCode, "Non-OK status code received")
+			return
+		}
+
+		// Parse the response body as JSON
+		var userData map[string]interface{}
+		err = json.NewDecoder(resp.Body).Decode(&userData)
+		if err != nil {
+			logger.WithError(err).Error("failed to parse user info as JSON")
+			c.JSON(http.StatusUnprocessableEntity, err.Error())
+			return
+		}
+
+		c.JSON(http.StatusOK, hh.ResponseData{
+			Message: "success",
+			Data:    userData,
+		})
+	}
+
+}
+
+func (hdl *AuthHandler) TwitterLogin(c *gin.Context) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":        "twitter_login",
+		"scope":       "auth handler",
+		"twitterconf": hdl.TwitterConf,
+	})
+	url := hdl.TwitterConf.AuthCodeURL("")
+	fmt.Println("url: ", url)
+
+	// // redirect to twitter login page
+	c.Redirect(http.StatusTemporaryRedirect, url)
+	logger.Info("redirected into: ", url)
+}
+
+func (hdl *AuthHandler) TwitterCallback(c *gin.Context) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "twitter_callback",
+		"scope": "auth handler",
+	})
+
+	// // state
+	// state := c.Request.URL.Query().Get("state")
+	// if state != config.Cfg.GoogleConf.State {
+	// 	logger.WithError(errors.New("state does not match"))
+	// 	c.JSON(http.StatusUnprocessableEntity, "state does not match")
+	// }
+
+	// code
+	code := c.Request.URL.Query().Get("code")
+	fmt.Println("code: ", code)
+
+	// exchange code for token
+	token, err := hdl.TwitterConf.Exchange(c, code)
+	fmt.Println("token: ", token)
 	if err != nil {
-		logger.WithError(err).Error("failed to get user info")
+		logger.WithError(err).Error("failed to exchange code into token")
 		c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+
+	// Create an HTTP client with the access token
+	httpClient := oauth2.NewClient(c, oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token.AccessToken}))
+
+	// Make the authenticated API request
+	resp, err := httpClient.Get(config.Cfg.TwitterConf.ApiEndpoint)
+	if err != nil {
+		logger.WithError(err).Error("failed to make API request")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logger.Error("non-OK status code received")
+		c.JSON(resp.StatusCode, "Non-OK status code received")
+		return
+	}
+
+	// Parse the response body as JSON
+	var userData map[string]interface{}
+	err = json.NewDecoder(resp.Body).Decode(&userData)
+	if err != nil {
+		logger.WithError(err).Error("failed to parse user info as JSON")
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, hh.ResponseData{
+		Message: "success",
+		Data:    userData,
+	})
+}
+func (hdl *AuthHandler) GithubLogin(c *gin.Context) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "github_login",
+		"scope": "auth handler",
+	})
+	url := hdl.GithubConf.AuthCodeURL("")
+	fmt.Println("url: ", url)
+
+	// // redirect to twitter login page
+	c.Redirect(http.StatusTemporaryRedirect, url)
+	logger.Info("redirected into: ", url)
+}
+
+func (hdl *AuthHandler) GithubCallback(c *gin.Context) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "github_callback",
+		"scope": "auth handler",
+	})
+
+	// code
+	code := c.Request.URL.Query().Get("code")
+
+	// exchange code for token
+	token, err := hdl.GithubConf.Exchange(c, code)
+	if err != nil {
+		logger.WithError(err).Error("failed to exchange code into token")
+		c.JSON(http.StatusUnprocessableEntity, err.Error())
+	}
+	if token == nil {
+		logger.WithError(err).Error("failed to get token")
+		c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// Create an HTTP client with the access token
+	httpClient := hdl.GithubConf.Client(c, token)
+	if httpClient == nil {
+		logger.WithError(err).Error("failed to initiate http client")
+		c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// Make the authenticated API request
+	resp, err := httpClient.Get(config.Cfg.GithubConf.TokenAccessUrl)
+	if err != nil {
+		logger.WithError(err).Error("failed to make API request")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer resp.Body.Close()

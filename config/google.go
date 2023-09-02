@@ -5,6 +5,14 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+type GoogleConf struct {
+	ClientID       string
+	ClientSecret   string
+	RedirectUrl    string
+	State          string
+	TokenAccessUrl string
+}
+
 func GetGoogleConfig() *oauth2.Config {
 	conf := &oauth2.Config{
 		ClientID:     Cfg.GoogleConf.ClientID,

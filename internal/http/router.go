@@ -36,6 +36,10 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	authGroup := r.Group("/auth")
 	authGroup.GET("/google/login", ah.GoogleLogin)
 	authGroup.GET("/google/callback", ah.GoogleCallback)
+	authGroup.GET("/twitter/login", ah.TwitterLogin)
+	authGroup.GET("/twitter/callback", ah.TwitterCallback)
+	authGroup.GET("/github/login", ah.GithubLogin)
+	authGroup.GET("/github/callback", ah.GithubCallback)
 
 	// users
 	userGroup := r.Group("/users")

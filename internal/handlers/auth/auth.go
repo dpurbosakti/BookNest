@@ -101,14 +101,14 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 
 func (hdl *AuthHandler) TwitterLogin(c *gin.Context) {
 	logger := logrus.WithFields(logrus.Fields{
-		"func":        "twitter_login",
-		"scope":       "auth handler",
-		"twitterconf": hdl.TwitterConf,
+		"func":  "twitter_login",
+		"scope": "auth handler",
 	})
-	url := hdl.TwitterConf.AuthCodeURL("")
-	fmt.Println("url: ", url)
 
-	// // redirect to twitter login page
+	// Generate the Twitter OAuth2 authorization URL
+	url := hdl.TwitterConf.AuthCodeURL("")
+
+	// Redirect the user to the Twitter login page
 	c.Redirect(http.StatusTemporaryRedirect, url)
 	logger.Info("redirected into: ", url)
 }

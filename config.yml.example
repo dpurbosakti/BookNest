@@ -21,3 +21,22 @@ emailConf:
   password: example
   host: example.gmail.com
   port: 888
+
+googleConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  state: 
+  tokenAccessUrl: https://www.googleapis.com/oauth2/v2/userinfo?access_token=
+
+twitterConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  apiEndpoint: 
+
+githubConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  tokenAccessUrl: https://api.github.com/user

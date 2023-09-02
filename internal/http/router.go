@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 
+	// auth
+	authHdl "book-nest/internal/handlers/auth"
+
 	// users
 	userHdl "book-nest/internal/handlers/user"
 	userRepo "book-nest/internal/repositories/user"
@@ -14,8 +17,13 @@ import (
 )
 
 func InitRouter(r *gin.Engine, db *gorm.DB) {
+
+	// auth
+	ah := authHdl.NewAuthHandler()
+
 	// emailhelper
 	email := eh.NewEmailHelper()
+
 	// users
 	ur := userRepo.NewUserRepository()
 	us := userSrv.NewUserService(ur, db, email)
@@ -23,6 +31,11 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 
 	// ping
 	r.GET("/ping", handlers.Ping)
+
+	// auth
+	authGroup := r.Group("/auth")
+	authGroup.GET("/google/login", ah.GoogleLogin)
+	authGroup.GET("/google/callback", ah.GoogleCallback)
 
 	// users
 	userGroup := r.Group("/users")

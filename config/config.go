@@ -19,20 +19,14 @@ type EmailConf struct {
 	Port     int
 }
 
-type GoogleConf struct {
-	ClientID       string
-	ClientSecret   string
-	RedirectUrl    string
-	State          string
-	TokenAccessUrl string
-}
-
 type Config struct {
-	DbConf     DbConf
-	HttpConf   HttpConf
-	EmailConf  EmailConf
-	LoggerConf *logrus.Logger
-	GoogleConf GoogleConf
+	DbConf      DbConf
+	HttpConf    HttpConf
+	EmailConf   EmailConf
+	LoggerConf  *logrus.Logger
+	GoogleConf  GoogleConf
+	TwitterConf TwitterConf
+	GithubConf  GithubConf
 }
 
 var Cfg *Config

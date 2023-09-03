@@ -9,6 +9,8 @@ import (
 
 	// auth
 	authHdl "book-nest/internal/handlers/auth"
+	authRepo "book-nest/internal/repositories/auth"
+	authSrv "book-nest/internal/services/auth"
 
 	// users
 	userHdl "book-nest/internal/handlers/user"
@@ -19,7 +21,9 @@ import (
 func InitRouter(r *gin.Engine, db *gorm.DB) {
 
 	// auth
-	ah := authHdl.NewAuthHandler()
+	ar := authRepo.NewAuthRepository()
+	as := authSrv.NewAuthService(ar, db)
+	ah := authHdl.NewAuthHandler(as)
 
 	// emailhelper
 	email := eh.NewEmailHelper()
@@ -34,6 +38,7 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 
 	// auth
 	authGroup := r.Group("/auth")
+	authGroup.POST("/login", ah.Login)
 	authGroup.GET("/google/login", ah.GoogleLogin)
 	authGroup.GET("/google/callback", ah.GoogleCallback)
 	authGroup.GET("/twitter/login", ah.TwitterLogin)

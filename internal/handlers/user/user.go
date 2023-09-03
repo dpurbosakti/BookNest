@@ -10,11 +10,11 @@ import (
 )
 
 type UserHandler struct {
-	userService mu.UserService
+	UserService mu.UserService
 }
 
 func NewUserHandler(userService mu.UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+	return &UserHandler{UserService: userService}
 }
 
 func (hdl *UserHandler) Create(c *gin.Context) {
@@ -32,7 +32,7 @@ func (hdl *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
-	result, errCreate := hdl.userService.Create(userReq)
+	result, errCreate := hdl.UserService.Create(userReq)
 
 	if errCreate != nil {
 		logger.WithError(errCreate).Error("failed to create user")

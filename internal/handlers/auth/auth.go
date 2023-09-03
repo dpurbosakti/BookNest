@@ -15,17 +15,36 @@ import (
 )
 
 type AuthHandler struct {
+	AuthService ma.AuthService
 	GoogleConf  *oauth2.Config
 	TwitterConf *oauth2.Config
 	GithubConf  *oauth2.Config
 }
 
-func NewAuthHandler() ma.AuthHandler {
+func NewAuthHandler(authService ma.AuthService) ma.AuthHandler {
 	return &AuthHandler{
+		AuthService: authService,
 		GoogleConf:  config.GetGoogleConfig(),
 		TwitterConf: config.GetTwitterConfig(),
 		GithubConf:  config.GetGithubConfig(),
 	}
+}
+
+func (hdl *AuthHandler) Login(c *gin.Context) {
+	var authReq ma.LoginRequest
+
+	err := c.ShouldBindJSON(&authReq)
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "login",
+		"scope": "auth handler",
+		"data":  authReq,
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to bind user")
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
 }
 
 func (hdl *AuthHandler) GoogleLogin(c *gin.Context) {

@@ -45,6 +45,21 @@ func (hdl *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
+	token, err := hdl.AuthService.Login(authReq)
+	if err != nil {
+		if err.Error() == "password incorrect" {
+			c.JSON(http.StatusUnauthorized, err.Error())
+			return
+		} else {
+			c.JSON(http.StatusNotFound, err.Error())
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"messaage": "ok",
+		"token":    token,
+	})
 }
 
 func (hdl *AuthHandler) GoogleLogin(c *gin.Context) {

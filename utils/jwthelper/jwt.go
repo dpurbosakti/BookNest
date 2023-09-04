@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenereteToken(input user.User) string {
+func GenereteToken(input *user.User) (string, error) {
 	claims := jwt5.MapClaims{
 		"id":      input.Id,
 		"name":    input.Name,
@@ -24,12 +24,8 @@ func GenereteToken(input user.User) string {
 	}
 
 	parseToken := jwt5.NewWithClaims(jwt5.SigningMethodHS256, claims)
-	signedToken, err := parseToken.SignedString([]byte(config.Cfg.JwtConf.SecretKey))
-	if err != nil {
-		return err.Error()
-	}
+	return parseToken.SignedString([]byte(config.Cfg.JwtConf.SecretKey))
 
-	return signedToken
 }
 
 func VerifyToken(ctx *gin.Context) (any, error) {

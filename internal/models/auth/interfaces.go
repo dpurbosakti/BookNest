@@ -18,9 +18,9 @@ type AuthHandler interface {
 }
 
 type AuthService interface {
-	Login(input LoginRequest)
+	Login(input LoginRequest) (*string, error)
 }
 
 type AuthRepository interface {
-	Login(tx *gorm.DB, input LoginRequest) (user.User, error)
+	Login(tx *gorm.DB, input LoginRequest) (*user.User, error)
 }

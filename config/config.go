@@ -19,6 +19,11 @@ type EmailConf struct {
 	Port     int
 }
 
+type JwtConf struct {
+	SecretKey         string
+	ExpiredTimeInHour uint
+}
+
 type Config struct {
 	DbConf      DbConf
 	HttpConf    HttpConf
@@ -27,6 +32,7 @@ type Config struct {
 	GoogleConf  GoogleConf
 	TwitterConf TwitterConf
 	GithubConf  GithubConf
+	JwtConf     JwtConf
 }
 
 var Cfg *Config

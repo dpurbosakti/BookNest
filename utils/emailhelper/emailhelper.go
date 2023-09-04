@@ -2,7 +2,7 @@ package emailhelper
 
 import (
 	"book-nest/config"
-	"book-nest/internal/models/user"
+	mu "book-nest/internal/models/user"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -10,7 +10,7 @@ import (
 )
 
 type Emailer interface {
-	SendEmailVerificationCode(user user.User) error
+	SendEmailVerificationCode(user *mu.User) error
 }
 
 type EmailHelper struct {
@@ -42,7 +42,7 @@ func parseTemplate(verificationCode string) string {
 	return fmt.Sprintf(verificationCodeHTML, verificationCode)
 }
 
-func (e *EmailHelper) SendEmailVerificationCode(user user.User) error {
+func (e *EmailHelper) SendEmailVerificationCode(user *mu.User) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", e.Email)
 	message.SetHeader("To", user.Email)

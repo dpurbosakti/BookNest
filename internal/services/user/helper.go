@@ -7,8 +7,8 @@ import (
 )
 
 // mappers
-func requestToModel(input user.UserCreateRequest) user.User {
-	return user.User{
+func requestToModel(input *user.UserCreateRequest) *user.User {
+	return &user.User{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
@@ -17,8 +17,8 @@ func requestToModel(input user.UserCreateRequest) user.User {
 	}
 }
 
-func modelToResponse(input user.User) user.UserResponse {
-	return user.UserResponse{
+func modelToResponse(input *user.User) *user.UserResponse {
+	return &user.UserResponse{
 		Id:               input.Id,
 		Name:             input.Name,
 		Email:            input.Email,

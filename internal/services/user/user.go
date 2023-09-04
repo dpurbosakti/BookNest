@@ -24,18 +24,23 @@ func NewUserService(userRepository mu.UserRepository, db *gorm.DB, emailer eh.Em
 	}
 }
 
-func (srv *UserService) Create(input mu.UserCreateRequest) (mu.UserResponse, error) {
+func (srv *UserService) Create(input *mu.UserCreateRequest) (*mu.UserResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
 		"scope": "user service",
-		"data":  input,
 	})
+
+	if input == nil {
+		return nil, errors.New("input is nil")
+	}
+
+	logger.WithField("data", input)
 	// var errChan = make(chan error)
-	var result mu.UserResponse
+	result := new(mu.UserResponse)
 	hashPassword, errHash := ph.HashPassword(input.Password)
 	if errHash != nil {
 		logger.WithError(errHash).Error("failed to hash password")
-		return result, errHash
+		return nil, errHash
 	}
 	input.Password = hashPassword
 	data := requestToModel(input)
@@ -68,7 +73,7 @@ func (srv *UserService) Create(input mu.UserCreateRequest) (mu.UserResponse, err
 	})
 	if err != nil {
 		logger.WithError(err).Error("failed to create user")
-		return mu.UserResponse{}, err
+		return nil, err
 	}
 
 	return result, nil

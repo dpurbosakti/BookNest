@@ -32,7 +32,7 @@ func (hdl *UserHandler) Create(c *gin.Context) {
 		return
 	}
 
-	result, errCreate := hdl.UserService.Create(userReq)
+	result, errCreate := hdl.UserService.Create(&userReq)
 
 	if errCreate != nil {
 		logger.WithError(errCreate).Error("failed to create user")

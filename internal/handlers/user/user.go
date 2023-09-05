@@ -45,3 +45,38 @@ func (hdl *UserHandler) Create(c *gin.Context) {
 		Data:    result,
 	})
 }
+
+func (hdl *UserHandler) Verify(c *gin.Context) {
+	var userReq mu.UserVerifyRequest
+
+	errBind := c.ShouldBindJSON(&userReq)
+	if errBind != nil {
+		c.JSON(http.StatusBadRequest, errBind)
+		return
+	}
+
+	err := hdl.UserService.Verify(&userReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+	c.JSON(http.StatusOK, "account is verified")
+}
+
+func (hdl *UserHandler) RefreshVerCode(c *gin.Context) {
+	userReq := new(mu.UserVerificationCodeRequest)
+
+	errBind := c.ShouldBindJSON(&userReq)
+	if errBind != nil {
+		c.JSON(http.StatusBadRequest, errBind)
+		return
+	}
+
+	err := hdl.UserService.RefreshVerificationCode(userReq)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, "new verification code has been sent to your registered email")
+}

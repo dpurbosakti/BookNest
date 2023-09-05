@@ -34,7 +34,7 @@ func modelToResponse(input *user.User) *user.UserResponse {
 }
 
 // verification code generator
-func generateVerCode(length int) (string, error) {
+func generateVerificationCode(length int) (string, error) {
 	seed := "012345679"
 	byteSlice := make([]byte, length)
 

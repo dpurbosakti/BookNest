@@ -23,8 +23,17 @@ type UserResponse struct {
 	Address          string         `json:"address"`
 	Role             string         `json:"role"`
 	VerificationCode string         `json:"verificationCode"`
-	IsVerified       bool           `json:"isVerified"`
-	CreatedAt        time.Time      `json:"createdAt"`
-	UpdatedAt        time.Time      `json:"updatedAt"`
-	DeletedAt        gorm.DeletedAt `json:"deletedAt"`
+	IsVerified       bool           `json:"is_verified"`
+	CreatedAt        time.Time      `json:"created_At"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+	DeletedAt        gorm.DeletedAt `json:"deleted_at"`
+}
+
+type UserVerifyRequest struct {
+	Email            string `json:"email" binding:"required,email"`
+	VerificationCode string `json:"verification_code" binding:"required"`
+}
+
+type UserVerificationCodeRequest struct {
+	Email string `json:"email" binding:"required,email"`
 }

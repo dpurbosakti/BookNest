@@ -49,4 +49,6 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	// users
 	userGroup := r.Group("/users")
 	userGroup.POST("", uh.Create)
+	userGroup.POST("/verify", uh.Verify)
+	userGroup.POST("/refreshcode", uh.RefreshVerCode)
 }

@@ -15,11 +15,6 @@ func NewUserRepository() mu.UserRepository {
 }
 
 func (repo *UserRepository) Create(tx *gorm.DB, input *mu.User) (*mu.User, error) {
-	// passwordHashed, errorHash := _bcrypt.GenerateFromPassword([]byte(user.Password), 10)
-	// if errorHash != nil {
-	// 	fmt.Println("Error hash", errorHash.Error())
-	// }
-	// user.Password = string(passwordHashed)
 	resultcreate := tx.Create(&input)
 	if resultcreate.Error != nil {
 		return nil, resultcreate.Error
@@ -45,4 +40,22 @@ func (repo *UserRepository) CheckDuplicate(tx *gorm.DB, input *mu.User) error {
 	}
 
 	return nil
+}
+
+func (repo *UserRepository) Update(tx *gorm.DB, input *mu.User) (*mu.User, error) {
+	result := tx.Save(&input)
+	if result.Error != nil {
+		return nil, errors.New("error updating your data")
+	}
+
+	return input, nil
+}
+
+func (repo *UserRepository) CheckEmail(tx *gorm.DB, email string) (*mu.User, error) {
+	user := new(mu.User)
+	result := tx.Where("email = ?", email).First(&user)
+	if result.Error != nil {
+		return nil, errors.New("error checking email")
+	}
+	return user, nil
 }

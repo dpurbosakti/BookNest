@@ -2,6 +2,7 @@ package http
 
 import (
 	"book-nest/internal/handlers"
+	"book-nest/internal/middlewares"
 	eh "book-nest/utils/emailhelper"
 
 	"github.com/gin-gonic/gin"
@@ -50,5 +51,10 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	userGroup := r.Group("/users")
 	userGroup.POST("", uh.Create)
 	userGroup.POST("/verify", uh.Verify)
-	userGroup.POST("/refreshcode", uh.RefreshVerCode)
+	userGroup.POST("/refreshcode", uh.RefreshVerificationCode)
+	userGroup.Use(middlewares.Authentication())
+	userGroup.GET("", middlewares.AdminAuthorization(), uh.GetList)
+	userGroup.GET("/detail", uh.GetDetail)
+	userGroup.PUT("/update", uh.Update)
+	userGroup.DELETE("/delete", uh.Delete)
 }

@@ -77,9 +77,9 @@ func ParseToken(c *gin.Context) (*user.User, error) {
 	if userData == nil {
 		return nil, errors.New("there is no user data provided")
 	}
-
+	userId, _ := uuid.Parse(userData["id"].(string))
 	resp := &user.User{
-		Id:      userData["id"].(uuid.UUID),
+		Id:      userId,
 		Name:    userData["name"].(string),
 		Email:   userData["email"].(string),
 		Phone:   userData["phone"].(string),

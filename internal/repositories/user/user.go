@@ -2,8 +2,11 @@ package user
 
 import (
 	mu "book-nest/internal/models/user"
+	"book-nest/utils/pagination"
 	"errors"
+	"fmt"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -58,4 +61,34 @@ func (repo *UserRepository) CheckEmail(tx *gorm.DB, email string) (*mu.User, err
 		return nil, errors.New("error checking email")
 	}
 	return user, nil
+}
+
+func (repository *UserRepository) GetDetail(tx *gorm.DB, userId uuid.UUID) (*mu.User, error) {
+	user := new(mu.User)
+	user.Id = userId
+	result := tx.First(&user, userId)
+	if result.Error != nil {
+		return nil, fmt.Errorf("user id %s not found", userId)
+	}
+
+	return user, nil
+}
+
+func (repo UserRepository) GetList(tx *gorm.DB, page pagination.Pagination) (pagination.Pagination, error) {
+	var users []mu.User
+
+	tx.Scopes(pagination.Paginate(users, &page, tx)).Find(&users)
+	page.Rows = users
+
+	return page, nil
+}
+
+func (repo UserRepository) Delete(tx *gorm.DB, userId uuid.UUID) error {
+	var user mu.User
+	result := tx.Delete(&user, userId)
+	if result.Error != nil {
+		return fmt.Errorf("user id %s not found", userId)
+	}
+
+	return nil
 }

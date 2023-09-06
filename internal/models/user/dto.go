@@ -16,17 +16,16 @@ type UserCreateRequest struct {
 }
 
 type UserResponse struct {
-	Id               uuid.UUID      `json:"id"`
-	Name             string         `json:"name"`
-	Email            string         `json:"email"`
-	Phone            string         `json:"phone"`
-	Address          string         `json:"address"`
-	Role             string         `json:"role"`
-	VerificationCode string         `json:"verificationCode"`
-	IsVerified       bool           `json:"is_verified"`
-	CreatedAt        time.Time      `json:"created_At"`
-	UpdatedAt        time.Time      `json:"updated_at"`
-	DeletedAt        gorm.DeletedAt `json:"deleted_at"`
+	Id         uuid.UUID      `json:"id"`
+	Name       string         `json:"name"`
+	Email      string         `json:"email"`
+	Phone      string         `json:"phone"`
+	Address    string         `json:"address"`
+	Role       string         `json:"role"`
+	IsVerified bool           `json:"is_verified"`
+	CreatedAt  time.Time      `json:"created_At"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  gorm.DeletedAt `json:"deleted_at"`
 }
 
 type UserVerifyRequest struct {
@@ -36,4 +35,11 @@ type UserVerifyRequest struct {
 
 type UserVerificationCodeRequest struct {
 	Email string `json:"email" binding:"required,email"`
+}
+
+type UserUpdateRequest struct {
+	Name     *string `json:"name"`
+	Password *string `json:"password"`
+	Phone    *string `json:"phone"`
+	Address  *string `json:"address"`
 }

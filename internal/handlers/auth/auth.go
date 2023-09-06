@@ -41,17 +41,17 @@ func (hdl *AuthHandler) Login(c *gin.Context) {
 	})
 	if err != nil {
 		logger.WithError(err).Error("failed to bind user")
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
 	token, err := hdl.AuthService.Login(authReq)
 	if err != nil {
 		if err.Error() == "password incorrect" {
-			c.JSON(http.StatusUnauthorized, err.Error())
+			c.JSON(http.StatusUnauthorized, gin.H{"message": err.Error()})
 			return
 		} else {
-			c.JSON(http.StatusNotFound, err.Error())
+			c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
 			return
 		}
 	}
@@ -84,7 +84,7 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 	state := c.Request.URL.Query().Get("state")
 	if state != config.Cfg.GoogleConf.State {
 		logger.WithError(errors.New("state does not match"))
-		c.JSON(http.StatusUnprocessableEntity, "state does not match")
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "state does not match"})
 	}
 
 	// code
@@ -94,25 +94,25 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 	token, err := hdl.GoogleConf.Exchange(c, code)
 	if err != nil {
 		logger.WithError(err).Error("failed to exchange code into token")
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 	}
 	if token == nil {
 		logger.WithError(err).Error("failed to get token")
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	} else {
 		// use google api to get user info
 		resp, err := http.Get(config.Cfg.GoogleConf.TokenAccessUrl + token.AccessToken)
 
 		if err != nil {
 			logger.WithError(err).Error("failed to get user info")
-			c.JSON(http.StatusUnprocessableEntity, err.Error())
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 			return
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			logger.Error("non-OK status code received")
-			c.JSON(resp.StatusCode, "Non-OK status code received")
+			c.JSON(resp.StatusCode, gin.H{"message": "Non-OK status code received"})
 			return
 		}
 
@@ -121,7 +121,7 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 		err = json.NewDecoder(resp.Body).Decode(&userData)
 		if err != nil {
 			logger.WithError(err).Error("failed to parse user info as JSON")
-			c.JSON(http.StatusUnprocessableEntity, err.Error())
+			c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 			return
 		}
 
@@ -169,7 +169,7 @@ func (hdl *AuthHandler) TwitterCallback(c *gin.Context) {
 	fmt.Println("token: ", token)
 	if err != nil {
 		logger.WithError(err).Error("failed to exchange code into token")
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 	}
 
 	// Create an HTTP client with the access token
@@ -186,7 +186,7 @@ func (hdl *AuthHandler) TwitterCallback(c *gin.Context) {
 
 	if resp.StatusCode != http.StatusOK {
 		logger.Error("non-OK status code received")
-		c.JSON(resp.StatusCode, "Non-OK status code received")
+		c.JSON(resp.StatusCode, gin.H{"message": "Non-OK status code received"})
 		return
 	}
 
@@ -195,7 +195,7 @@ func (hdl *AuthHandler) TwitterCallback(c *gin.Context) {
 	err = json.NewDecoder(resp.Body).Decode(&userData)
 	if err != nil {
 		logger.WithError(err).Error("failed to parse user info as JSON")
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -230,18 +230,18 @@ func (hdl *AuthHandler) GithubCallback(c *gin.Context) {
 	token, err := hdl.GithubConf.Exchange(c, code)
 	if err != nil {
 		logger.WithError(err).Error("failed to exchange code into token")
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 	}
 	if token == nil {
 		logger.WithError(err).Error("failed to get token")
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 
 	// Create an HTTP client with the access token
 	httpClient := hdl.GithubConf.Client(c, token)
 	if httpClient == nil {
 		logger.WithError(err).Error("failed to initiate http client")
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 	}
 
 	// Make the authenticated API request
@@ -255,7 +255,7 @@ func (hdl *AuthHandler) GithubCallback(c *gin.Context) {
 
 	if resp.StatusCode != http.StatusOK {
 		logger.Error("non-OK status code received")
-		c.JSON(resp.StatusCode, "Non-OK status code received")
+		c.JSON(resp.StatusCode, gin.H{"message": "Non-OK status code received"})
 		return
 	}
 
@@ -264,7 +264,7 @@ func (hdl *AuthHandler) GithubCallback(c *gin.Context) {
 	err = json.NewDecoder(resp.Body).Decode(&userData)
 	if err != nil {
 		logger.WithError(err).Error("failed to parse user info as JSON")
-		c.JSON(http.StatusUnprocessableEntity, err.Error())
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": err.Error()})
 		return
 	}
 

@@ -1,14 +1,14 @@
 package user
 
 import (
-	"book-nest/internal/models/user"
+	mu "book-nest/internal/models/user"
 	"crypto/rand"
 	"math/big"
 )
 
 // mappers
-func requestToModel(input *user.UserCreateRequest) *user.User {
-	return &user.User{
+func requestToModel(input *mu.UserCreateRequest) *mu.User {
+	return &mu.User{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
@@ -17,19 +17,36 @@ func requestToModel(input *user.UserCreateRequest) *user.User {
 	}
 }
 
-func modelToResponse(input *user.User) *user.UserResponse {
-	return &user.UserResponse{
-		Id:               input.Id,
-		Name:             input.Name,
-		Email:            input.Email,
-		Phone:            input.Phone,
-		Address:          input.Address,
-		Role:             input.Role,
-		VerificationCode: input.VerificationCode,
-		IsVerified:       input.IsVerified,
-		CreatedAt:        input.CreatedAt,
-		UpdatedAt:        input.UpdatedAt,
-		DeletedAt:        input.DeletedAt,
+func modelToResponse(input *mu.User) *mu.UserResponse {
+	return &mu.UserResponse{
+		Id:         input.Id,
+		Name:       input.Name,
+		Email:      input.Email,
+		Phone:      input.Phone,
+		Address:    input.Address,
+		Role:       input.Role,
+		IsVerified: input.IsVerified,
+		CreatedAt:  input.CreatedAt,
+		UpdatedAt:  input.UpdatedAt,
+		DeletedAt:  input.DeletedAt,
+	}
+}
+
+func copier(originalData *mu.User, newData *mu.UserUpdateRequest) {
+	if newData.Name != nil {
+		originalData.Name = *newData.Name
+	}
+
+	if newData.Address != nil {
+		originalData.Address = *newData.Address
+	}
+
+	if newData.Password != nil {
+		originalData.Password = *newData.Password
+	}
+
+	if newData.Phone != nil {
+		originalData.Phone = *newData.Phone
 	}
 }
 

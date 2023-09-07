@@ -6,7 +6,6 @@ import (
 	"book-nest/utils/pagination"
 	ph "book-nest/utils/passwordhelper"
 	"errors"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -190,10 +189,6 @@ func (srv *UserService) GetList(page pagination.Pagination) (pagination.Paginati
 		"scope": "user service",
 	})
 	var result pagination.Pagination
-	if page.Sort != "" {
-		tmp := strings.Replace(page.Sort, "_", " ", 1)
-		page.Sort = tmp
-	}
 	logger.Info("data page", page)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")

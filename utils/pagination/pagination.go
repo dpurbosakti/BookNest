@@ -61,7 +61,8 @@ func (p *Pagination) GetColumn() string {
 func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	var totalRows int64
 	db = db.Model(value)
-	if column := pagination.GetColumn(); column != "" {
+	if search := pagination.GetSearch(); search != "" {
+
 		db = db.Where(pagination.GetColumn()+" LIKE ?", "%"+pagination.GetSearch()+"%")
 	}
 	db.Count(&totalRows)
@@ -71,6 +72,9 @@ func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *g
 	pagination.TotalPages = totalPages
 
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Where(pagination.GetColumn()+" LIKE ?", "%"+pagination.GetSearch()+"%").Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort()).Omit("password", "verification_code")
+		if search := pagination.GetSearch(); search != "" {
+			return db.Where(pagination.GetColumn()+" LIKE ?", "%"+pagination.GetSearch()+"%").Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort()).Omit("password", "verification_code")
+		}
+		return db.Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort()).Omit("password", "verification_code")
 	}
 }

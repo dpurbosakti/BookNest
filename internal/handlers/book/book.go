@@ -15,7 +15,7 @@ type BookHandler struct {
 	BookService mb.BookService
 }
 
-func NewBookHandler(userService mb.BookService) *BookHandler {
+func NewBookHandler(userService mb.BookService) mb.BookHandler {
 	return &BookHandler{BookService: userService}
 }
 

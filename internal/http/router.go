@@ -3,77 +3,44 @@ package http
 import (
 	"book-nest/internal/handlers"
 	"book-nest/internal/middlewares"
-	eh "book-nest/utils/emailhelper"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-
-	// auth
-	authHdl "book-nest/internal/handlers/auth"
-	authRepo "book-nest/internal/repositories/auth"
-	authSrv "book-nest/internal/services/auth"
-
-	// users
-	userHdl "book-nest/internal/handlers/user"
-	userRepo "book-nest/internal/repositories/user"
-	userSrv "book-nest/internal/services/user"
-
-	// books
-	bookHdl "book-nest/internal/handlers/book"
-	bookRepo "book-nest/internal/repositories/book"
-	bookSrv "book-nest/internal/services/book"
 )
 
 func InitRouter(r *gin.Engine, db *gorm.DB) {
-
-	// auth
-	ar := authRepo.NewAuthRepository()
-	as := authSrv.NewAuthService(ar, db)
-	ah := authHdl.NewAuthHandler(as)
-
-	// emailhelper
-	email := eh.NewEmailHelper()
-
-	// users
-	ur := userRepo.NewUserRepository()
-	us := userSrv.NewUserService(ur, db, email)
-	uh := userHdl.NewUserHandler(us)
-
-	// books
-	br := bookRepo.NewBookRepository()
-	bs := bookSrv.NewBookService(br, db)
-	bh := bookHdl.NewBookHandler(bs)
+	p := NewPresenter(db)
 
 	// ping
 	r.GET("/ping", handlers.Ping)
 
 	// auth
 	authGroup := r.Group("/auth")
-	authGroup.POST("/login", ah.Login)
-	authGroup.GET("/google/login", ah.GoogleLogin)
-	authGroup.GET("/google/callback", ah.GoogleCallback)
-	authGroup.GET("/twitter/login", ah.TwitterLogin)
-	authGroup.GET("/twitter/callback", ah.TwitterCallback)
-	authGroup.GET("/github/login", ah.GithubLogin)
-	authGroup.GET("/github/callback", ah.GithubCallback)
+	authGroup.POST("/login", p.Auth.Login)
+	authGroup.GET("/google/login", p.Auth.GoogleLogin)
+	authGroup.GET("/google/callback", p.Auth.GoogleCallback)
+	authGroup.GET("/twitter/login", p.Auth.TwitterLogin)
+	authGroup.GET("/twitter/callback", p.Auth.TwitterCallback)
+	authGroup.GET("/github/login", p.Auth.GithubLogin)
+	authGroup.GET("/github/callback", p.Auth.GithubCallback)
 
 	// users
 	userGroup := r.Group("/users")
-	userGroup.POST("", uh.Create)
-	userGroup.POST("/verify", uh.Verify)
-	userGroup.POST("/refreshcode", uh.RefreshVerificationCode)
+	userGroup.POST("", p.User.Create)
+	userGroup.POST("/verify", p.User.Verify)
+	userGroup.POST("/refreshcode", p.User.RefreshVerificationCode)
 	userGroup.Use(middlewares.Authentication())
-	userGroup.GET("", middlewares.AdminAuthorization(), uh.GetList)
-	userGroup.GET("/detail", uh.GetDetail)
-	userGroup.PUT("/update", uh.Update)
-	userGroup.DELETE("/delete", uh.Delete)
+	userGroup.GET("", middlewares.AdminAuthorization(), p.User.GetList)
+	userGroup.GET("/detail", p.User.GetDetail)
+	userGroup.PUT("/update", p.User.Update)
+	userGroup.DELETE("/delete", p.User.Delete)
 
 	// books
 	bookGroup := r.Group("/books")
-	bookGroup.GET("/:id", bh.GetDetail)
-	bookGroup.GET("", bh.GetList)
+	bookGroup.GET("/:id", p.Book.GetDetail)
+	bookGroup.GET("", p.Book.GetList)
 	bookGroup.Use(middlewares.Authentication())
-	bookGroup.POST("", middlewares.AdminAuthorization(), bh.Create)
-	bookGroup.PUT("/:id", middlewares.AdminAuthorization(), bh.Update)
-	bookGroup.DELETE("/:id", middlewares.AdminAuthorization(), bh.Delete)
+	bookGroup.POST("", middlewares.AdminAuthorization(), p.Book.Create)
+	bookGroup.PUT("/:id", middlewares.AdminAuthorization(), p.Book.Update)
+	bookGroup.DELETE("/:id", middlewares.AdminAuthorization(), p.Book.Delete)
 }

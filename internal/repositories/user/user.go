@@ -63,7 +63,7 @@ func (repo *UserRepository) CheckEmail(tx *gorm.DB, email string) (*mu.User, err
 	return user, nil
 }
 
-func (repository *UserRepository) GetDetail(tx *gorm.DB, userId uuid.UUID) (*mu.User, error) {
+func (repo *UserRepository) GetDetail(tx *gorm.DB, userId uuid.UUID) (*mu.User, error) {
 	user := new(mu.User)
 	user.Id = userId
 	result := tx.First(&user, userId)

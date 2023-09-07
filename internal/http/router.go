@@ -17,6 +17,11 @@ import (
 	userHdl "book-nest/internal/handlers/user"
 	userRepo "book-nest/internal/repositories/user"
 	userSrv "book-nest/internal/services/user"
+
+	// books
+	bookHdl "book-nest/internal/handlers/book"
+	bookRepo "book-nest/internal/repositories/book"
+	bookSrv "book-nest/internal/services/book"
 )
 
 func InitRouter(r *gin.Engine, db *gorm.DB) {
@@ -33,6 +38,11 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	ur := userRepo.NewUserRepository()
 	us := userSrv.NewUserService(ur, db, email)
 	uh := userHdl.NewUserHandler(us)
+
+	// books
+	br := bookRepo.NewBookRepository()
+	bs := bookSrv.NewBookService(br, db)
+	bh := bookHdl.NewBookHandler(bs)
 
 	// ping
 	r.GET("/ping", handlers.Ping)
@@ -57,4 +67,13 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	userGroup.GET("/detail", uh.GetDetail)
 	userGroup.PUT("/update", uh.Update)
 	userGroup.DELETE("/delete", uh.Delete)
+
+	// books
+	bookGroup := r.Group("/books")
+	bookGroup.GET("/:id", bh.GetDetail)
+	bookGroup.GET("", bh.GetList)
+	bookGroup.Use(middlewares.Authentication())
+	bookGroup.POST("", middlewares.AdminAuthorization(), bh.Create)
+	bookGroup.PUT("/:id", middlewares.AdminAuthorization(), bh.Update)
+	bookGroup.DELETE("/:id", middlewares.AdminAuthorization(), bh.Delete)
 }

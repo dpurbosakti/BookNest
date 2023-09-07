@@ -130,6 +130,9 @@ func (hdl *UserHandler) GetList(c *gin.Context) {
 	page.Limit = limitInt
 	page.Page = pageInt
 	page.Sort = c.Query("sort")
+	page.Search = c.Query("search")
+	column := "name"
+	page.Column = &column
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "get_list",
 		"scope": "user handler",

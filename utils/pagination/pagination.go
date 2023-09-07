@@ -9,7 +9,9 @@ import (
 type Pagination struct {
 	Limit      int         `json:"limit,omitempty"`
 	Page       int         `json:"page,omitempty"`
-	Sort       string      `json:"sort,omitempty" validate:"sort"`
+	Sort       string      `json:"sort,omitempty"`
+	Search     string      `json:"search,omitempty"`
+	Column     *string     `json:"column,omitempty"`
 	TotalRows  int64       `json:"total_rows"`
 	TotalPages int         `json:"total_pages"`
 	Rows       interface{} `json:"rows"`
@@ -34,21 +36,41 @@ func (p *Pagination) GetPage() int {
 }
 
 func (p *Pagination) GetSort() string {
-	if p.Sort == "" {
+	switch p.Sort {
+	case "desc":
+		p.Sort = "Id desc"
+	case "asc":
+		p.Sort = "Id asc"
+	default:
 		p.Sort = "Id desc"
 	}
 	return p.Sort
 }
 
+func (p *Pagination) GetSearch() string {
+	return p.Search
+}
+
+func (p *Pagination) GetColumn() string {
+	if p.Column == nil {
+		return "name"
+	}
+	return *p.Column
+}
+
 func Paginate(value interface{}, pagination *Pagination, db *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	var totalRows int64
-	db.Model(value).Count(&totalRows)
+	db = db.Model(value)
+	if column := pagination.GetColumn(); column != "" {
+		db = db.Where(pagination.GetColumn()+" LIKE ?", "%"+pagination.GetSearch()+"%")
+	}
+	db.Count(&totalRows)
 
 	pagination.TotalRows = totalRows
 	totalPages := int(math.Ceil(float64(totalRows) / float64(pagination.GetLimit())))
 	pagination.TotalPages = totalPages
 
 	return func(db *gorm.DB) *gorm.DB {
-		return db.Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort()).Omit("password", "verification_code")
+		return db.Where(pagination.GetColumn()+" LIKE ?", "%"+pagination.GetSearch()+"%").Offset(pagination.GetOffset()).Limit(pagination.GetLimit()).Order(pagination.GetSort()).Omit("password", "verification_code")
 	}
 }

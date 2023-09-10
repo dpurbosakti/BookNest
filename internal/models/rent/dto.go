@@ -8,7 +8,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type Rent struct {
+type RentCreateRequest struct {
+	BookId        uint      `json:"book_id"`
+	BorrowingDate time.Time `json:"borrowing_date"`
+	ReturnedDate  time.Time `json:"returned_date"`
+}
+
+type RentResponse struct {
 	Id            uint      `json:"id"`
 	UserId        uuid.UUID `json:"user_id"`
 	User          *mu.User  `json:"user,omitempty"`

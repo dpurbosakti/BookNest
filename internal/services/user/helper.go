@@ -32,24 +32,6 @@ func modelToResponse(input *mu.User) *mu.UserResponse {
 	}
 }
 
-func copier(originalData *mu.User, newData *mu.UserUpdateRequest) {
-	if newData.Name != nil {
-		originalData.Name = *newData.Name
-	}
-
-	if newData.Address != nil {
-		originalData.Address = *newData.Address
-	}
-
-	if newData.Password != nil {
-		originalData.Password = *newData.Password
-	}
-
-	if newData.Phone != nil {
-		originalData.Phone = *newData.Phone
-	}
-}
-
 // verification code generator
 func generateVerificationCode(length int) (string, error) {
 	seed := "012345679"

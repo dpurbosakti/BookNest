@@ -1,8 +1,8 @@
 package user
 
 import (
+	"book-nest/clients/gomail"
 	mu "book-nest/internal/models/user"
-	eh "book-nest/utils/emailhelper"
 	"book-nest/utils/pagination"
 	ph "book-nest/utils/passwordhelper"
 	"errors"
@@ -15,14 +15,14 @@ import (
 type UserService struct {
 	UserRepository mu.UserRepository
 	DB             *gorm.DB
-	EmailHelper    eh.Emailer
+	Gomail         *gomail.Gomail
 }
 
-func NewUserService(userRepository mu.UserRepository, db *gorm.DB, emailer eh.Emailer) mu.UserService {
+func NewUserService(userRepository mu.UserRepository, db *gorm.DB, gomail *gomail.Gomail) mu.UserService {
 	return &UserService{
 		UserRepository: userRepository,
 		DB:             db,
-		EmailHelper:    emailer,
+		Gomail:         gomail,
 	}
 }
 
@@ -61,7 +61,7 @@ func (srv *UserService) Create(input *mu.UserCreateRequest) (*mu.UserResponse, e
 			return err
 		}
 		result = modelToResponse(resultRepo)
-		if err := srv.EmailHelper.SendEmailVerificationCode(data); err != nil {
+		if err := srv.Gomail.SendEmailVerificationCode(data); err != nil {
 			return errors.New("failed to send email: " + err.Error())
 		}
 		logger.WithField("data", data).Info("end of db transaction")
@@ -149,7 +149,7 @@ func (srv *UserService) RefreshVerificationCode(input *mu.UserVerificationCodeRe
 		return err
 	}
 
-	err = srv.EmailHelper.SendEmailVerificationCode(dataUser)
+	err = srv.Gomail.SendEmailVerificationCode(dataUser)
 	if err != nil {
 		logger.Error("failed to send email verification code")
 		return errors.New("failed to send email verification code: " + err.Error())

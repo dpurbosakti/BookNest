@@ -256,7 +256,7 @@ func (srv *UserService) Update(input *mu.UserUpdateRequest, userId uuid.UUID) (*
 			logger.WithError(err).Error("failed to get detail")
 			return err
 		}
-		copier(resultGet, input)
+		resultGet.Copier(input)
 		resultUpdate, err := srv.UserRepository.Update(tx, resultGet)
 		if err != nil {
 			logger.WithError(err).Error("failed to update data")

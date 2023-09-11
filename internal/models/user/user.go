@@ -21,3 +21,21 @@ type User struct {
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `json:"deleted_at" gorm:"index"`
 }
+
+func (u *User) Copier(input *UserUpdateRequest) {
+	if input.Name != nil {
+		u.Name = *input.Name
+	}
+
+	if input.Address != nil {
+		u.Address = *input.Address
+	}
+
+	if input.Password != nil {
+		u.Password = *input.Password
+	}
+
+	if input.Phone != nil {
+		u.Phone = *input.Phone
+	}
+}

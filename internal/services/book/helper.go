@@ -26,17 +26,3 @@ func modelToResponse(input *mb.Book) *mb.BookResponse {
 		DeletedAt:     input.DeletedAt,
 	}
 }
-
-func copier(originalData *mb.Book, newData *mb.BookUpdateRequest) {
-	if newData.Title != nil {
-		originalData.Title = *newData.Title
-	}
-
-	if newData.Author != nil {
-		originalData.Author = *newData.Author
-	}
-
-	if newData.RentFeePerDay != nil {
-		originalData.RentFeePerDay = *newData.RentFeePerDay
-	}
-}

@@ -150,7 +150,7 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 			logger.WithError(err).Error("failed to get detail")
 			return err
 		}
-		copier(resultGet, input)
+		resultGet.Copier(input)
 		resultUpdate, err := srv.BookRepository.Update(tx, resultGet)
 		if err != nil {
 			logger.WithError(err).Error("failed to update data")

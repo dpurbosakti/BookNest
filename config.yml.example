@@ -40,3 +40,8 @@ githubConf:
   clientSecret: 
   redirectUrl: 
   tokenAccessUrl: https://api.github.com/user
+
+midtransConf:
+  merchantID:
+  clientKey:
+  serverKey:

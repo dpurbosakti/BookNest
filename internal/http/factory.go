@@ -1,7 +1,7 @@
 package http
 
 import (
-	eh "book-nest/utils/emailhelper"
+	"book-nest/clients/gomail"
 
 	"gorm.io/gorm"
 
@@ -33,12 +33,12 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	as := authSrv.NewAuthService(ar, db)
 	ah := authHdl.NewAuthHandler(as)
 
-	// emailhelper
-	email := eh.NewEmailHelper()
+	// clients
+	gomail := gomail.NewGomailClient()
 
 	// users
 	ur := userRepo.NewUserRepository()
-	us := userSrv.NewUserService(ur, db, email)
+	us := userSrv.NewUserService(ur, db, gomail)
 	uh := userHdl.NewUserHandler(us)
 
 	// books

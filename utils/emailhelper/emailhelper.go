@@ -9,6 +9,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+// TODO: delete
 type Emailer interface {
 	SendEmailVerificationCode(user *mu.User) error
 }

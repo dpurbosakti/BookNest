@@ -17,6 +17,7 @@ type RentCreateRequest struct {
 
 type RentResponse struct {
 	Id            uint           `json:"id"`
+	ReferenceId   string         `json:"reference_id"`
 	UserId        uuid.UUID      `json:"user_id"`
 	User          *mu.User       `json:"user,omitempty"`
 	BookId        uint           `json:"book_id"`
@@ -24,6 +25,8 @@ type RentResponse struct {
 	BorrowingDate time.Time      `json:"borrowing_date"`
 	ReturnedDate  time.Time      `json:"returned_date"`
 	Fee           float64        `json:"fee"`
+	Token         *string        `json:"token,omitempty"`
+	RedirectURL   *string        `json:"redirect_url,omitempty"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at"`

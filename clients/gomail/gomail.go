@@ -60,3 +60,7 @@ func (g *Gomail) SendEmailVerificationCode(user *mu.User) error {
 	logger.Info("email sent...")
 	return nil
 }
+
+func (g *Gomail) SendInvoice(user *mu.User) error {
+	return nil
+}

@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -38,4 +39,11 @@ func (u *User) Copier(input *UserUpdateRequest) {
 	if input.Phone != nil {
 		u.Phone = *input.Phone
 	}
+}
+
+func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+	if len(u.Name) < 2 {
+		return errors.New("name must be at least 3 characters")
+	}
+	return nil
 }

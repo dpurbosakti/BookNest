@@ -2,6 +2,7 @@ package http
 
 import (
 	"book-nest/clients/gomail"
+	"book-nest/clients/midtrans"
 
 	"gorm.io/gorm"
 
@@ -19,12 +20,18 @@ import (
 	bookHdl "book-nest/internal/handlers/book"
 	bookRepo "book-nest/internal/repositories/book"
 	bookSrv "book-nest/internal/services/book"
+
+	// rents
+	rentHdl "book-nest/internal/handlers/rent"
+	rentRepo "book-nest/internal/repositories/rent"
+	rentSrv "book-nest/internal/services/rent"
 )
 
 type Presenter struct {
 	Auth *authHdl.AuthHandler
 	User *userHdl.UserHandler
 	Book *bookHdl.BookHandler
+	Rent *rentHdl.RentHandler
 }
 
 func NewPresenter(db *gorm.DB) *Presenter {
@@ -35,6 +42,7 @@ func NewPresenter(db *gorm.DB) *Presenter {
 
 	// clients
 	gomail := gomail.NewGomailClient()
+	midtrans := midtrans.NewMidtransClient()
 
 	// users
 	ur := userRepo.NewUserRepository()
@@ -46,9 +54,15 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	bs := bookSrv.NewBookService(br, db)
 	bh := bookHdl.NewBookHandler(bs)
 
+	// rents
+	rr := rentRepo.NewRentRepository()
+	rs := rentSrv.NewRentService(rr, br, ur, db, gomail, midtrans)
+	rh := rentHdl.NewRentHandler(rs)
+
 	return &Presenter{
 		Auth: ah.(*authHdl.AuthHandler),
 		User: uh.(*userHdl.UserHandler),
 		Book: bh.(*bookHdl.BookHandler),
+		Rent: rh.(*rentHdl.RentHandler),
 	}
 }

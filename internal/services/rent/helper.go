@@ -4,6 +4,9 @@ import (
 	mr "book-nest/internal/models/rent"
 )
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+const refLength = 6
+
 // mappers
 func requestToModel(input *mr.RentCreateRequest) *mr.Rent {
 	return &mr.Rent{
@@ -16,6 +19,7 @@ func requestToModel(input *mr.RentCreateRequest) *mr.Rent {
 func modelToResponse(input *mr.Rent) *mr.RentResponse {
 	return &mr.RentResponse{
 		Id:            input.Id,
+		ReferenceId:   input.ReferenceId,
 		UserId:        input.UserId,
 		User:          input.User,
 		BookId:        input.BookId,

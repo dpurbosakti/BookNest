@@ -43,4 +43,9 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	bookGroup.POST("", middlewares.AdminAuthorization(), p.Book.Create)
 	bookGroup.PUT("/:id", middlewares.AdminAuthorization(), p.Book.Update)
 	bookGroup.DELETE("/:id", middlewares.AdminAuthorization(), p.Book.Delete)
+
+	// rents
+	rentGroup := r.Group("/rents")
+	rentGroup.Use(middlewares.Authentication())
+	rentGroup.POST("", p.Rent.Create)
 }

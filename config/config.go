@@ -25,14 +25,15 @@ type JwtConf struct {
 }
 
 type Config struct {
-	DbConf      DbConf
-	HttpConf    HttpConf
-	EmailConf   EmailConf
-	LoggerConf  *logrus.Logger
-	GoogleConf  GoogleConf
-	TwitterConf TwitterConf
-	GithubConf  GithubConf
-	JwtConf     JwtConf
+	DbConf       DbConf
+	HttpConf     HttpConf
+	EmailConf    EmailConf
+	LoggerConf   *logrus.Logger
+	GoogleConf   GoogleConf
+	TwitterConf  TwitterConf
+	GithubConf   GithubConf
+	JwtConf      JwtConf
+	MidtransConf MidtransConf
 }
 
 var Cfg *Config

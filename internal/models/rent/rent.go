@@ -11,7 +11,7 @@ import (
 )
 
 type Rent struct {
-	Id            uint           `json:"id"`
+	Id            uint           `json:"id" gorm:"primaryKey,autoIncrement"`
 	ReferenceId   string         `json:"reference_id"`
 	UserId        uuid.UUID      `json:"user_id"`
 	User          *mu.User       `json:"user,omitempty"`

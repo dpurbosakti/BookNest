@@ -6,8 +6,10 @@ import (
 	mb "book-nest/internal/models/book"
 	mr "book-nest/internal/models/rent"
 	mu "book-nest/internal/models/user"
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
@@ -49,6 +51,7 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 	logger.WithField("data", input)
 	result := new(mr.RentResponse)
 	data := requestToModel(input)
+	data.UserId = userId
 	token := new(string)
 	redirect_url := new(string)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
@@ -93,6 +96,11 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 		result = modelToResponse(resultRepo)
 		result.Token = token
 		result.RedirectURL = redirect_url
+		err = srv.Gomail.SendInvoice(result)
+		if err != nil {
+			logger.WithError(err).Error("failed to send invoice email")
+			return err
+		}
 		logger.WithField("data", data).Info("end of db transaction")
 		return nil
 	})
@@ -105,19 +113,24 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 }
 
 func (srv *RentService) GenerateReferenceId(tx *gorm.DB) string {
-	n := 7
-	sb := strings.Builder{}
-	sb.Grow(n)
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
+	var sb strings.Builder
+
+	for {
+		// Generate a random index based on the length of the charset
+		idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		if err != nil {
+			panic(err) // Handle the error appropriately in your application
 		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			sb.WriteByte(letterBytes[idx])
-			i--
+
+		// Use the random index to select a character from the charset
+		randomChar := charset[idx.Int64()]
+
+		// Append the random character to the result string
+		sb.WriteByte(randomChar)
+
+		if sb.Len() == refLength {
+			break
 		}
-		cache >>= letterIdxBits
-		remain--
 	}
 
 	refId := fmt.Sprintf("%s%s", time.Now().Format("20060102"), sb.String())

@@ -31,3 +31,8 @@ type RentResponse struct {
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at"`
 }
+
+func (rr *RentResponse) GetDaysBetween() int {
+	duration := rr.ReturnedDate.Sub(rr.BorrowingDate)
+	return int(duration.Hours() / 24)
+}

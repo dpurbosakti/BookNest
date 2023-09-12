@@ -4,7 +4,6 @@ import (
 	"book-nest/config"
 	mr "book-nest/internal/models/rent"
 	"fmt"
-	"strconv"
 
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/snap"
@@ -26,10 +25,9 @@ func NewMidtransClient() *Midtrans {
 func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
 	logger := logrus.WithField("func", "create_payment")
 	logger.WithField("rent_id", input.Id).Info()
-	idString := strconv.Itoa(int(input.Id))
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  idString,
+			OrderID:  input.ReferenceId,
 			GrossAmt: int64(input.Fee),
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
@@ -42,7 +40,7 @@ func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
 	res, err := m.Client.CreateTransaction(req)
 	if err != nil {
 		logger.WithError(err).Error("failed to create transaction")
-		return nil, nil, fmt.Errorf("failed to create transaction, rent id : %d, error: %w", input.Id, err)
+		return nil, nil, fmt.Errorf("failed to create transaction, rent id : %s, error: %w", input.ReferenceId, err)
 	}
 	return &res.Token, &res.RedirectURL, nil
 }

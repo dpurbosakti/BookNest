@@ -66,7 +66,7 @@ func (repo *UserRepository) CheckEmail(tx *gorm.DB, email string) (*mu.User, err
 func (repo *UserRepository) GetDetail(tx *gorm.DB, userId uuid.UUID) (*mu.User, error) {
 	user := new(mu.User)
 	user.Id = userId
-	result := tx.First(&user, userId)
+	result := tx.Omit("password").Omit("verification_code").First(&user, userId)
 	if result.Error != nil {
 		return nil, fmt.Errorf("user id %s not found", userId)
 	}

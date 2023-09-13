@@ -46,6 +46,7 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 
 	// rents
 	rentGroup := r.Group("/rents")
+	rentGroup.POST("/midtrans/callback", p.Rent.MidtransCallback)
 	rentGroup.Use(middlewares.Authentication())
 	rentGroup.POST("", p.Rent.Create)
 }

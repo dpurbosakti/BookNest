@@ -98,7 +98,7 @@ const invoiceRentHTML = `
         <h1>Rent Invoice</h1>
         <p><strong>Book Title:</strong> %s</p>
         <p><strong>Days of Rent:</strong> %d days</p>
-        <p class="total"><strong>Amount:</strong> Rp.%2.f</p>
+        <p><strong>Amount:</strong> Rp.%2.f</p>
 		<p><strong>Token:</strong> %s</p>
 		<p><strong>Payment Link:</strong> %s</p>
        

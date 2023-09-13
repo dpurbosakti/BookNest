@@ -2,6 +2,7 @@ package rent
 
 import (
 	mr "book-nest/internal/models/rent"
+	"errors"
 	"fmt"
 
 	"gorm.io/gorm"
@@ -34,4 +35,13 @@ func (repo *RentRepository) GetDetail(tx *gorm.DB, referenceId string) (*mr.Rent
 		return nil, nil
 	}
 	return rent, nil
+}
+
+func (repo *RentRepository) Update(tx *gorm.DB, input *mr.Rent) (*mr.Rent, error) {
+	result := tx.Save(&input)
+	if result.Error != nil {
+		return nil, errors.New("error updating your data")
+	}
+
+	return input, nil
 }

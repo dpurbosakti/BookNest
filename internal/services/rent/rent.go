@@ -142,3 +142,58 @@ func (srv *RentService) GenerateReferenceId(tx *gorm.DB) string {
 
 	return refId
 }
+
+func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "update",
+		"scope": "rent service",
+	})
+
+	if input == nil {
+		return nil, errors.New("input is nil")
+	}
+
+	logger.WithField("data", input).Info()
+	result := new(mr.RentResponse)
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		resultRent, err := srv.RentRepository.GetDetail(tx, input.ReferenceId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get rent data")
+			return err
+		}
+		resultRent.PaymentStatus = input.PaymentStatus
+
+		resultRepo, err := srv.RentRepository.Update(tx, resultRent)
+		if err != nil {
+			logger.WithError(err).Error("failed to create rent")
+			return err
+		}
+
+		resultUser, err := srv.UserRepository.GetDetail(tx, resultRepo.UserId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get user")
+			return err
+		}
+		resultRepo.User = resultUser
+
+		result = modelToResponse(resultRepo)
+
+		if input.PaymentStatus == "settlement" {
+			err := srv.Gomail.SendSuccessPayment(input, resultRepo)
+			if err != nil {
+				logger.WithError(err).Error("failed to send invoice email")
+				return err
+			}
+		}
+
+		logger.Info("end of db transaction")
+		return nil
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to create rent")
+		return nil, err
+	}
+
+	return result, nil
+}

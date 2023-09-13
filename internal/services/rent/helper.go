@@ -27,6 +27,7 @@ func modelToResponse(input *mr.Rent) *mr.RentResponse {
 		BorrowingDate: input.BorrowingDate,
 		ReturnedDate:  input.ReturnedDate,
 		Fee:           input.Fee,
+		PaymentStatus: input.PaymentStatus,
 		CreatedAt:     input.CreatedAt,
 		UpdatedAt:     input.UpdatedAt,
 		DeletedAt:     input.DeletedAt,

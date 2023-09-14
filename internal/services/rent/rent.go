@@ -81,13 +81,7 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 			logger.WithError(err).Error("failed to create rent")
 			return err
 		}
-		resultBook.AvailableAt = &data.ReturnedDate
-		resultBook.IsAvailable = false
-		_, err = srv.BookRepository.Update(tx, resultBook)
-		if err != nil {
-			logger.WithError(err).Error("failed to update book")
-			return err
-		}
+
 		token, redirect_url, err = srv.Midtrans.CreatePayment(data)
 		if err != nil {
 			logger.WithError(err).Error("failed to create payment")
@@ -166,7 +160,7 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 
 		resultRepo, err := srv.RentRepository.Update(tx, resultRent)
 		if err != nil {
-			logger.WithError(err).Error("failed to create rent")
+			logger.WithError(err).Error("failed to update rent")
 			return err
 		}
 
@@ -196,4 +190,60 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 	}
 
 	return result, nil
+}
+
+func (srv *RentService) Accept(referenceId string) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "accept",
+		"scope":        "rent service",
+		"reference_id": referenceId,
+	})
+	logger.Info()
+
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get rent data")
+			return err
+		}
+		if resultRent.PaymentStatus != PaymentSettlement {
+			logger.Error("cannot accpet, payment status is not settlement")
+			return errors.New("cannot accpet, payment status is not settlement")
+		}
+		if resultRent.Status == "rejected" {
+			logger.Error("cannot accpet, rent already rejected")
+			return errors.New("cannot accpet, rent already rejected")
+		}
+
+		resultBook, err := srv.BookRepository.GetDetail(tx, resultRent.BookId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get book")
+			return err
+		}
+
+		resultBook.AvailableAt = &resultRent.ReturnedDate
+		resultBook.IsAvailable = false
+		_, err = srv.BookRepository.Update(tx, resultBook)
+		if err != nil {
+			logger.WithError(err).Error("failed to update book")
+			return err
+		}
+		resultRent.Status = "accepted"
+		_, err = srv.RentRepository.Update(tx, resultRent)
+		if err != nil {
+			logger.WithError(err).Error("failed to create rent")
+			return err
+		}
+
+		logger.Info("end of db transaction")
+		return nil
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to create rent")
+		return err
+	}
+
+	return nil
 }

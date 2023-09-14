@@ -21,6 +21,7 @@ type Rent struct {
 	ReturnedDate  time.Time      `json:"returned_date"`
 	Fee           float64        `json:"fee"`
 	PaymentStatus string         `json:"payment_status" gorm:"default:initiate"`
+	Status        string         `json:"status" gorm:"default:initiate"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at" gorm:"index"`

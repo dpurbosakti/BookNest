@@ -14,6 +14,7 @@ type RentService interface {
 	Create(input *RentCreateRequest, userId uuid.UUID) (*RentResponse, error)
 	GenerateReferenceId(tx *gorm.DB) string
 	Update(input *RentUpdateRequest) (*RentResponse, error)
+	Accept(referenceId string) error
 }
 type RentRepository interface {
 	Create(tx *gorm.DB, input *Rent) (*Rent, error)

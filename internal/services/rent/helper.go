@@ -6,6 +6,7 @@ import (
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const refLength = 6
+const PaymentSettlement = "settlement"
 
 // mappers
 func requestToModel(input *mr.RentCreateRequest) *mr.Rent {
@@ -28,6 +29,7 @@ func modelToResponse(input *mr.Rent) *mr.RentResponse {
 		ReturnedDate:  input.ReturnedDate,
 		Fee:           input.Fee,
 		PaymentStatus: input.PaymentStatus,
+		Status:        input.Status,
 		CreatedAt:     input.CreatedAt,
 		UpdatedAt:     input.UpdatedAt,
 		DeletedAt:     input.DeletedAt,

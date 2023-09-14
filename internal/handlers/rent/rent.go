@@ -59,7 +59,7 @@ func (hdl *RentHandler) MidtransCallback(c *gin.Context) {
 	midtransReq := new(midtrans.MidtransRequest)
 	errBind := c.ShouldBindJSON(&midtransReq)
 	logger := logrus.WithFields(logrus.Fields{
-		"func":  "create",
+		"func":  "midtrans_callback",
 		"scope": "rent handler",
 		"data":  midtransReq,
 	})
@@ -82,4 +82,32 @@ func (hdl *RentHandler) MidtransCallback(c *gin.Context) {
 		Message: "success",
 		Data:    result,
 	})
+}
+
+func (hdl *RentHandler) Accept(c *gin.Context) {
+	id := c.Param("reference_id")
+
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "accept",
+		"scope": "rent handler",
+		"id":    id,
+	})
+
+	if id == "" {
+		logger.Warn("no reference id provided")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
+		return
+	}
+	errUpdate := hdl.RentService.Accept(id)
+
+	if errUpdate != nil {
+		logger.WithError(errUpdate).Error("failed to accept rent")
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errUpdate.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "success",
+	})
+
 }

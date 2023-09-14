@@ -26,6 +26,7 @@ type RentResponse struct {
 	ReturnedDate  time.Time      `json:"returned_date"`
 	Fee           float64        `json:"fee"`
 	PaymentStatus string         `json:"payment_status"`
+	Status        string         `json:"status"`
 	Token         *string        `json:"token,omitempty"`
 	RedirectURL   *string        `json:"redirect_url,omitempty"`
 	CreatedAt     time.Time      `json:"created_at"`

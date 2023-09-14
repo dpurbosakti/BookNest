@@ -49,4 +49,5 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	rentGroup.POST("/midtrans/callback", p.Rent.MidtransCallback)
 	rentGroup.Use(middlewares.Authentication())
 	rentGroup.POST("", p.Rent.Create)
+	rentGroup.POST("/accept/:reference_id", middlewares.AdminAuthorization(), p.Rent.Accept)
 }

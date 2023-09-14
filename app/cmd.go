@@ -13,7 +13,8 @@ import (
 func init() {
 	cobra.OnInitialize(initProject)
 
-	rootCmd.AddCommand(migrateCmd)
+	rootCmd.AddCommand(migrateUpCmd)
+	rootCmd.AddCommand(migrateDownCmd)
 	rootCmd.AddCommand(serveCmd)
 
 }
@@ -28,9 +29,13 @@ var (
 	rootCmd = &cobra.Command{
 		Use: "book-nest",
 	}
-	migrateCmd = &cobra.Command{
-		Use: "migrate",
-		Run: migrate,
+	migrateUpCmd = &cobra.Command{
+		Use: "migrate_up",
+		Run: migrateUp,
+	}
+	migrateDownCmd = &cobra.Command{
+		Use: "migrate_down",
+		Run: migrateDown,
 	}
 
 	serveCmd = &cobra.Command{
@@ -44,12 +49,23 @@ var (
 	server http.Server
 )
 
-func migrate(cmd *cobra.Command, args []string) {
-	logger := logrus.WithField("func", "migrate")
+func migrateUp(cmd *cobra.Command, args []string) {
+	logger := logrus.WithField("func", "migrate_up")
 	logger.Info("start migration")
-	err := migration.Migrate(DB)
+	err := migration.MigrateUp(DB)
 	if err != nil {
-		logger.WithError(err).Error("error where running migration")
+		logger.WithError(err).Error("error when running migration")
+		panic(err)
+	}
+	logger.Info("done")
+}
+
+func migrateDown(cmd *cobra.Command, args []string) {
+	logger := logrus.WithField("func", "migrate_down")
+	logger.Info("start migration")
+	err := migration.MigrateDown(DB)
+	if err != nil {
+		logger.WithError(err).Error("error when running migration")
 		panic(err)
 	}
 	logger.Info("done")

@@ -4,6 +4,7 @@ import (
 	"book-nest/config"
 	"book-nest/internal/http"
 	"book-nest/migration"
+	s "book-nest/seeder"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -15,6 +16,7 @@ func init() {
 
 	rootCmd.AddCommand(migrateUpCmd)
 	rootCmd.AddCommand(migrateDownCmd)
+	rootCmd.AddCommand(seederCmd)
 	rootCmd.AddCommand(serveCmd)
 
 }
@@ -36,6 +38,10 @@ var (
 	migrateDownCmd = &cobra.Command{
 		Use: "migrate_down",
 		Run: migrateDown,
+	}
+	seederCmd = &cobra.Command{
+		Use: "seeder",
+		Run: seeder,
 	}
 
 	serveCmd = &cobra.Command{
@@ -66,6 +72,17 @@ func migrateDown(cmd *cobra.Command, args []string) {
 	err := migration.MigrateDown(DB)
 	if err != nil {
 		logger.WithError(err).Error("error when running migration")
+		panic(err)
+	}
+	logger.Info("done")
+}
+
+func seeder(cmd *cobra.Command, args []string) {
+	logger := logrus.WithField("func", "seeder")
+	logger.Info("start seeding")
+	err := s.DbSeed(DB)
+	if err != nil {
+		logger.WithError(err).Error("error when running seeder")
 		panic(err)
 	}
 	logger.Info("done")

@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GenereteToken(input *user.User) (string, error) {
+func GenerateToken(input *user.User) (string, error) {
 	claims := jwt5.MapClaims{
 		"id":      input.Id,
 		"name":    input.Name,

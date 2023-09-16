@@ -35,11 +35,6 @@ type Presenter struct {
 }
 
 func NewPresenter(db *gorm.DB) *Presenter {
-	// auth
-	ar := authRepo.NewAuthRepository()
-	as := authSrv.NewAuthService(ar, db)
-	ah := authHdl.NewAuthHandler(as)
-
 	// clients
 	gomail := gomail.NewGomailClient()
 	midtrans := midtrans.NewMidtransClient()
@@ -48,6 +43,11 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	ur := userRepo.NewUserRepository()
 	us := userSrv.NewUserService(ur, db, gomail)
 	uh := userHdl.NewUserHandler(us)
+
+	// auth
+	ar := authRepo.NewAuthRepository()
+	as := authSrv.NewAuthService(ar, ur, db)
+	ah := authHdl.NewAuthHandler(as)
 
 	// books
 	br := bookRepo.NewBookRepository()

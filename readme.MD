@@ -29,7 +29,7 @@ Before you begin, ensure you have met the following requirements:
 
 3. Run the migration to set up the database:
    ```sh
-   go run . migrate
+   go run . migrate_up
 
    ```
 
@@ -40,3 +40,10 @@ To run the app you need to run this following command
 go run . serve
 ```
 **Note:** When running the application using the `go run . serve` command, make sure you are in the root directory of the cloned repository. This is the directory where the `main.go` file is located. Running the command from this directory ensures that the application is correctly started and served.
+
+
+## More Commands
+```sh
+go run . migrate_down #drop all tables
+go run . seeder # seeding book table
+```

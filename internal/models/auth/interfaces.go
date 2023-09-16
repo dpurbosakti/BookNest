@@ -19,6 +19,7 @@ type AuthHandler interface {
 
 type AuthService interface {
 	Login(input LoginRequest) (*string, error)
+	LoginByGoogle(input *GoogleResponse) (*string, error)
 }
 
 type AuthRepository interface {

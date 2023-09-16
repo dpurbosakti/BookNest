@@ -117,7 +117,7 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 		}
 
 		// Parse the response body as JSON
-		var userData map[string]interface{}
+		var userData *ma.GoogleResponse
 		err = json.NewDecoder(resp.Body).Decode(&userData)
 		if err != nil {
 			logger.WithError(err).Error("failed to parse user info as JSON")
@@ -125,9 +125,16 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, hh.ResponseData{
-			Message: "success",
-			Data:    userData,
+		token, err := hdl.AuthService.LoginByGoogle(userData)
+		if err != nil {
+			logger.WithError(err).Error("failed to login by google")
+			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "success",
+			"token":   token,
 		})
 	}
 

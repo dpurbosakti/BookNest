@@ -83,7 +83,7 @@ func (srv *UserService) Verify(input *mu.UserVerifyRequest) error {
 	logger.WithField("data", input)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		result, err := srv.UserRepository.CheckEmail(tx, input.Email)
+		result, err := srv.UserRepository.GetByEmail(tx, input.Email)
 		if err != nil {
 			logger.WithError(err).Error("failed to check email")
 			return err
@@ -124,7 +124,7 @@ func (srv *UserService) RefreshVerificationCode(input *mu.UserVerificationCodeRe
 	logger.WithField("data", input)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRepo, err := srv.UserRepository.CheckEmail(tx, input.Email)
+		resultRepo, err := srv.UserRepository.GetByEmail(tx, input.Email)
 		logger.WithError(err).Error("failed to check email")
 		if err != nil {
 			return err

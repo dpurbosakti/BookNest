@@ -33,10 +33,11 @@ func InitDb() (DB *gorm.DB) {
 		return
 	}
 	var gormD gorm.Dialector
-	if Cfg.DbConf.Dialect == "mysql" {
+	switch Cfg.DbConf.Dialect {
+	case "mysql":
 		gormD = mysql.Open(mysqlDsnBuilder(Cfg.DbConf))
 		logger.WithField("dsn", mysqlDsnBuilder(Cfg.DbConf)).Info()
-	} else if Cfg.DbConf.Dialect == "postgres" {
+	case "postgres":
 		gormD = postgres.Open(postgresDsnBuilder(Cfg.DbConf))
 	}
 

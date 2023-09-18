@@ -18,6 +18,7 @@ type User struct {
 	Role             string         `json:"role" gorm:"default:user"`
 	VerificationCode string         `json:"verification_code"`
 	IsVerified       bool           `json:"is_verified"`
+	OauthAccessToken string         `json:"oauth_access_token"`
 	CreatedAt        time.Time      `json:"created_at"`
 	UpdatedAt        time.Time      `json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `json:"deleted_at" gorm:"index"`

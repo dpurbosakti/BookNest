@@ -88,9 +88,9 @@ func (hdl *RentHandler) Accept(c *gin.Context) {
 	id := c.Param("reference_id")
 
 	logger := logrus.WithFields(logrus.Fields{
-		"func":  "accept",
-		"scope": "rent handler",
-		"id":    id,
+		"func":         "accept",
+		"scope":        "rent handler",
+		"reference_id": id,
 	})
 
 	if id == "" {

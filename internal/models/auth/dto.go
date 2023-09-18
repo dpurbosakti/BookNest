@@ -6,7 +6,8 @@ type LoginRequest struct {
 }
 
 type GoogleResponse struct {
-	Email         string `json:"email"`
-	Name          string `json:"name"`
-	VerifiedEmail bool   `json:"verified_email"`
+	Email            string `json:"email"`
+	Name             string `json:"name"`
+	VerifiedEmail    bool   `json:"verified_email"`
+	OauthAccessToken string `json:"oauth_access_token"`
 }

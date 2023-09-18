@@ -125,7 +125,8 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 			return
 		}
 
-		token, err := hdl.AuthService.LoginByGoogle(userData)
+		userData.OauthAccessToken = token.AccessToken
+		jwtToken, err := hdl.AuthService.LoginByGoogle(userData)
 		if err != nil {
 			logger.WithError(err).Error("failed to login by google")
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
@@ -134,7 +135,7 @@ func (hdl *AuthHandler) GoogleCallback(c *gin.Context) {
 
 		c.JSON(http.StatusOK, gin.H{
 			"message": "success",
-			"token":   token,
+			"token":   jwtToken,
 		})
 	}
 

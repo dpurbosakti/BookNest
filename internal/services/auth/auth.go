@@ -83,6 +83,11 @@ func (srv *AuthService) LoginByGoogle(input *ma.GoogleResponse) (*string, error)
 			if err != nil {
 				return err
 			}
+			resultGet.OauthAccessToken = data.OauthAccessToken
+			_, err := srv.UserRepository.Update(tx, resultGet)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})

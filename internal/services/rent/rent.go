@@ -6,6 +6,8 @@ import (
 	mb "book-nest/internal/models/book"
 	mr "book-nest/internal/models/rent"
 	mu "book-nest/internal/models/user"
+	ch "book-nest/utils/calendarhelper"
+	"context"
 	"crypto/rand"
 	"errors"
 	"fmt"
@@ -15,6 +17,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
+	"google.golang.org/api/calendar/v3"
+	"google.golang.org/api/option"
 	"gorm.io/gorm"
 )
 
@@ -236,6 +241,29 @@ func (srv *RentService) Accept(referenceId string) error {
 			return err
 		}
 
+		resultUser, err := srv.UserRepository.GetDetail(tx, resultRent.UserId)
+		if err != nil {
+			logger.WithError(err).Error("failed to create rent")
+			return err
+		}
+
+		oauthToken := oauth2.Token{
+			AccessToken: resultUser.OauthAccessToken,
+		}
+		client := ch.GetClient(&oauthToken)
+		calService, _ := calendar.NewService(context.Background(), option.WithHTTPClient(client))
+		event := &calendar.Event{
+			Summary:     "Rent returned date",
+			Description: "The day to return the book you rented",
+			Start: &calendar.EventDateTime{
+				DateTime: resultRent.ReturnedDate.Format(time.RFC3339),
+			},
+		}
+		_, err = calService.Events.Insert("primary", event).Do()
+		if err != nil {
+			logger.WithError(err).Error("failed to insert event into calendar")
+			return err
+		}
 		logger.Info("end of db transaction")
 		return nil
 	})

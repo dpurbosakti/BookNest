@@ -7,8 +7,9 @@ import (
 
 func googleResponseToModel(input *ma.GoogleResponse) *mu.User {
 	return &mu.User{
-		Email:      input.Email,
-		Name:       input.Name,
-		IsVerified: input.VerifiedEmail,
+		Email:            input.Email,
+		Name:             input.Name,
+		IsVerified:       input.VerifiedEmail,
+		OauthAccessToken: input.OauthAccessToken,
 	}
 }

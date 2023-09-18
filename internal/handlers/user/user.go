@@ -196,11 +196,9 @@ func (hdl *UserHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if userReq.Phone != nil {
-		if !hh.PhoneValidator(*userReq.Phone) {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "phone number format is incorrect"})
-			return
-		}
+	if userReq.Phone != nil && !hh.PhoneValidator(*userReq.Phone) {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "phone number format is incorrect"})
+		return
 	}
 
 	userData, err := jh.ParseToken(c)

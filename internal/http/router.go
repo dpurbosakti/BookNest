@@ -27,7 +27,7 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	// users
 	userGroup := r.Group("/users")
 	userGroup.POST("", p.User.Create)
-	userGroup.POST("/verify", p.User.Verify)
+	userGroup.POST("/verify-email", p.User.Verify)
 	userGroup.POST("/refreshcode", p.User.RefreshVerificationCode)
 	userGroup.Use(middlewares.Authentication())
 	userGroup.GET("", middlewares.AdminAuthorization(), p.User.GetList)
@@ -49,5 +49,5 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	rentGroup.POST("/midtrans/callback", p.Rent.MidtransCallback)
 	rentGroup.Use(middlewares.Authentication())
 	rentGroup.POST("", p.Rent.Create)
-	rentGroup.POST("/accept/:reference_id", middlewares.AdminAuthorization(), p.Rent.Accept)
+	rentGroup.POST("/:reference_id/accept", middlewares.AdminAuthorization(), p.Rent.Accept)
 }

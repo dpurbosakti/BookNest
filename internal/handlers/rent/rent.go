@@ -98,7 +98,7 @@ func (hdl *RentHandler) Accept(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
 		return
 	}
-	errUpdate := hdl.RentService.Accept(id)
+	errUpdate := hdl.RentService.Accept(c, id)
 
 	if errUpdate != nil {
 		logger.WithError(errUpdate).Error("failed to accept rent")

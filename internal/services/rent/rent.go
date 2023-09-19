@@ -15,6 +15,9 @@ import (
 	"strings"
 	"time"
 
+	jwt5 "github.com/golang-jwt/jwt/v5"
+
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
@@ -197,7 +200,7 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 	return result, nil
 }
 
-func (srv *RentService) Accept(referenceId string) error {
+func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "accept",
 		"scope":        "rent service",
@@ -212,10 +215,12 @@ func (srv *RentService) Accept(referenceId string) error {
 			logger.WithError(err).Error("failed to get rent data")
 			return err
 		}
+
 		if resultRent.PaymentStatus != PaymentSettlement {
 			logger.Error("cannot accpet, payment status is not settlement")
 			return errors.New("cannot accpet, payment status is not settlement")
 		}
+
 		if resultRent.Status == "rejected" {
 			logger.Error("cannot accpet, rent already rejected")
 			return errors.New("cannot accpet, rent already rejected")
@@ -229,11 +234,13 @@ func (srv *RentService) Accept(referenceId string) error {
 
 		resultBook.AvailableAt = &resultRent.ReturnedDate
 		resultBook.IsAvailable = false
+
 		_, err = srv.BookRepository.Update(tx, resultBook)
 		if err != nil {
 			logger.WithError(err).Error("failed to update book")
 			return err
 		}
+
 		resultRent.Status = "accepted"
 		_, err = srv.RentRepository.Update(tx, resultRent)
 		if err != nil {
@@ -250,15 +257,36 @@ func (srv *RentService) Accept(referenceId string) error {
 		oauthToken := oauth2.Token{
 			AccessToken: resultUser.OauthAccessToken,
 		}
+
+		userData := ctx.MustGet("userData").(jwt5.MapClaims)
+		adminEmail := userData["email"].(string)
+		adminName := userData["name"].(string)
+
 		client := ch.GetClient(&oauthToken)
-		calService, _ := calendar.NewService(context.Background(), option.WithHTTPClient(client))
+		calService, err := calendar.NewService(context.Background(), option.WithHTTPClient(client))
+		if err != nil {
+			logger.WithError(err).Error("failed to create calendar service")
+			return err
+		}
+
 		event := &calendar.Event{
 			Summary:     "Rent returned date",
 			Description: "The day to return the book you rented",
 			Start: &calendar.EventDateTime{
 				DateTime: resultRent.ReturnedDate.Format(time.RFC3339),
 			},
+			End: &calendar.EventDateTime{
+				DateTime: resultRent.ReturnedDate.Add(1 * time.Hour).Format(time.RFC3339),
+			},
+			Creator: &calendar.EventCreator{
+				Email:       adminEmail,
+				DisplayName: adminName,
+			},
+			Attendees: []*calendar.EventAttendee{
+				{Email: resultUser.Email, DisplayName: resultUser.Name},
+			},
 		}
+
 		_, err = calService.Events.Insert("primary", event).Do()
 		if err != nil {
 			logger.WithError(err).Error("failed to insert event into calendar")

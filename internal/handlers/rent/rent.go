@@ -98,15 +98,43 @@ func (hdl *RentHandler) Accept(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
 		return
 	}
-	errUpdate := hdl.RentService.Accept(c, id)
+	errAccept := hdl.RentService.Accept(c, id)
 
-	if errUpdate != nil {
-		logger.WithError(errUpdate).Error("failed to accept rent")
-		c.JSON(http.StatusInternalServerError, gin.H{"message": errUpdate.Error()})
+	if errAccept != nil {
+		logger.WithError(errAccept).Error("failed to accept rent")
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errAccept.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
+
+}
+
+func (hdl *RentHandler) Reject(c *gin.Context) {
+	id := c.Param("reference_id")
+
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "reject",
+		"scope":        "rent handler",
+		"reference_id": id,
+	})
+
+	if id == "" {
+		logger.Warn("no reference id provided")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
+		return
+	}
+	errReject := hdl.RentService.Reject(c, id)
+
+	if errReject != nil {
+		logger.WithError(errReject).Error("failed to reject rent")
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errReject.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
 	})
 

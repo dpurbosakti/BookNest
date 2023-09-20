@@ -15,6 +15,7 @@ type RentService interface {
 	GenerateReferenceId(tx *gorm.DB) string
 	Update(input *RentUpdateRequest) (*RentResponse, error)
 	Accept(ctx *gin.Context, referenceId string) error
+	Reject(ctx *gin.Context, referenceId string) error
 }
 type RentRepository interface {
 	Create(tx *gorm.DB, input *Rent) (*Rent, error)

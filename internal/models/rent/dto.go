@@ -39,6 +39,7 @@ type RentUpdateRequest struct {
 	PaymentStatus   string
 	TransactionTime string
 	PaymentType     string
+	GrossAmount     string
 }
 
 func (rr *RentResponse) GetDaysBetween() int {

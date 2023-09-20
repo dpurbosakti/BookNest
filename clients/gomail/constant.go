@@ -95,3 +95,20 @@ const paymentSuccessHTML = `
 </body>
 </html>
 `
+
+const paymentRefundedHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment Refunded</title>
+</head>
+<body>
+    <h1>Payment Refunded</h1>
+    <p><strong>Order Id:</strong> %s</p>
+    <p><strong>Amount:</strong> %s</p>
+    <p><strong>Reason:</strong> %s</p>
+    <p><strong>Refunded At:</strong> %s</p>
+    <p>Your payment has been refunded successfully.</p>
+    <p>Any further questions or concerns, please contact our support team.</p>
+</body>
+</html>`

@@ -184,7 +184,7 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 		if input.PaymentStatus == "settlement" {
 			err := srv.Gomail.SendSuccessPayment(input, resultRepo)
 			if err != nil {
-				logger.WithError(err).Error("failed to send invoice email")
+				logger.WithError(err).Error("failed to send payment success email")
 				return err
 			}
 		}
@@ -222,8 +222,8 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 		}
 
 		if resultRent.Status == "rejected" {
-			logger.Error("cannot accpet, rent already rejected")
-			return errors.New("cannot accpet, rent already rejected")
+			logger.Error("cannot accept, rent already rejected")
+			return errors.New("cannot accept, rent already rejected")
 		}
 
 		resultBook, err := srv.BookRepository.GetDetail(tx, resultRent.BookId)
@@ -244,13 +244,13 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 		resultRent.Status = "accepted"
 		_, err = srv.RentRepository.Update(tx, resultRent)
 		if err != nil {
-			logger.WithError(err).Error("failed to create rent")
+			logger.WithError(err).Error("failed to update rent")
 			return err
 		}
 
 		resultUser, err := srv.UserRepository.GetDetail(tx, resultRent.UserId)
 		if err != nil {
-			logger.WithError(err).Error("failed to create rent")
+			logger.WithError(err).Error("failed to get detail rent data")
 			return err
 		}
 
@@ -298,6 +298,56 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 
 	if err != nil {
 		logger.WithError(err).Error("failed to create rent")
+		return err
+	}
+
+	return nil
+}
+
+func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "reject",
+		"scope":        "rent service",
+		"reference_id": referenceId,
+	})
+	logger.Info()
+
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get rent data")
+			return err
+		}
+
+		if resultRent.PaymentStatus != PaymentSettlement {
+			logger.Error("cannot reject, payment status is not settlement")
+			return errors.New("cannot reject, payment status is not settlement")
+		}
+
+		res, err := srv.Midtrans.Refund(resultRent)
+		if err != nil {
+			logger.WithError(err).Error("failed to do refund")
+			return err
+		}
+
+		resultRent.Status = "rejected"
+		_, err = srv.RentRepository.Update(tx, resultRent)
+		if err != nil {
+			logger.WithError(err).Error("failed to update rent")
+			return err
+		}
+
+		err = srv.Gomail.SendRefundedPayment(res, resultRent)
+		if err != nil {
+			logger.WithError(err).Error("failed to send payment refunded email")
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		logger.WithError(err).Error("failed to reject rent")
 		return err
 	}
 

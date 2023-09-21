@@ -59,14 +59,13 @@ func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
 func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
 	url := fmt.Sprintf("https://api.sandbox.midtrans.com/v2/%s/refund", input.ReferenceId)
 
-	payload := new(MidtransRefundRequest)
-	payload.RefundKey = input.ReferenceId
-	payload.Reason = "Item out of stock"
-	payload.Amount = input.Fee
-
+	payload := payloadRefundBuilder(input)
 	jsonPayload, _ := json.Marshal(payload)
 
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
 
 	req.SetBasicAuth(config.Cfg.MidtransConf.ServerKey, "")
 	req.Header.Add("accept", "application/json")
@@ -92,5 +91,6 @@ func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
 	if refundResponse.StatusCode != "200" {
 		return nil, fmt.Errorf("refund failed, payload: %v", refundResponse)
 	}
+
 	return refundResponse, nil
 }

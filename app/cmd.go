@@ -52,6 +52,7 @@ var (
 	// global variable
 	DB     *gorm.DB
 	Config *config.Config
+
 	server http.Server
 )
 

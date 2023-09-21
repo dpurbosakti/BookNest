@@ -3,8 +3,11 @@ package midtrans
 import (
 	"book-nest/config"
 	mr "book-nest/internal/models/rent"
-	"errors"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
@@ -53,26 +56,41 @@ func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
 	return &res.Token, &res.RedirectURL, nil
 }
 
-func (m *Midtrans) Refund(input *mr.Rent) (*mr.RentUpdateRequest, error) {
-	refundRequest := &coreapi.RefundReq{
-		Amount: int64(input.Fee),
-		Reason: "Item out of stock",
-	}
+func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
+	url := fmt.Sprintf("https://api.sandbox.midtrans.com/v2/%s/refund", input.ReferenceId)
 
-	res, err := m.ClientCore.RefundTransaction(input.ReferenceId, refundRequest)
+	payload := new(MidtransRefundRequest)
+	payload.RefundKey = input.ReferenceId
+	payload.Reason = "Item out of stock"
+	payload.Amount = input.Fee
+
+	jsonPayload, _ := json.Marshal(payload)
+
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+
+	req.SetBasicAuth(config.Cfg.MidtransConf.ServerKey, "")
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("content-type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.StatusCode != "200" {
-		return nil, errors.New(res.StatusMessage)
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
 	}
 
-	result := new(mr.RentUpdateRequest)
-	result.PaymentStatus = res.TransactionStatus
-	result.PaymentType = res.PaymentType
-	result.ReferenceId = res.OrderID
-	result.TransactionTime = res.TransactionTime
-	result.GrossAmount = res.GrossAmount
-	return result, nil
+	var refundResponse *MidtransRefundResponse
+	err = json.Unmarshal(body, &refundResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	if refundResponse.StatusCode != "200" {
+		return nil, fmt.Errorf("refund failed, payload: %v", refundResponse)
+	}
+	return refundResponse, nil
 }

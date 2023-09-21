@@ -1,6 +1,7 @@
 package gomail
 
 import (
+	"book-nest/clients/midtrans"
 	"book-nest/config"
 	mr "book-nest/internal/models/rent"
 	mu "book-nest/internal/models/user"
@@ -39,8 +40,8 @@ func parsePaymentSuccessTemplate(input *mr.RentUpdateRequest) string {
 	return fmt.Sprintf(paymentSuccessHTML, input.ReferenceId, input.PaymentType, input.TransactionTime)
 }
 
-func parsePaymentRefundedTemplate(input *mr.RentUpdateRequest) string {
-	return fmt.Sprintf(paymentRefundedHTML, input.ReferenceId, input.GrossAmount, "Item Out of Stock", input.TransactionTime)
+func parsePaymentRefundedTemplate(input *midtrans.MidtransRefundResponse) string {
+	return fmt.Sprintf(paymentRefundedHTML, input.OrderId, input.RefundAmount, "Item Out of Stock", input.TransactionTime)
 }
 
 func (g *Gomail) SendEmailVerificationCode(user *mu.User) error {
@@ -100,7 +101,7 @@ func (g *Gomail) SendSuccessPayment(input *mr.RentUpdateRequest, rent *mr.Rent) 
 	return nil
 }
 
-func (g *Gomail) SendRefundedPayment(input *mr.RentUpdateRequest, rent *mr.Rent) error {
+func (g *Gomail) SendRefundedPayment(input *midtrans.MidtransRefundResponse, rent *mr.Rent) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", g.Email)
 	message.SetHeader("To", rent.User.Email)

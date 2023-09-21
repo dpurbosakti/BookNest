@@ -27,3 +27,17 @@ type MidtransRequest struct {
 	ExpiryTime        string          `json:"expiry_time"`
 	Currency          string          `json:"currency"`
 }
+
+type MidtransRefundRequest struct {
+	RefundKey string  `json:"refund_key"`
+	Amount    float64 `json:"amount"`
+	Reason    string  `json:"reason"`
+}
+
+type MidtransRefundResponse struct {
+	StatusCode      string `json:"status_code"`
+	StatusMessage   string `json:"status_message"`
+	OrderId         string `json:"order_id"`
+	TransactionTime string `json:"transaction_time"`
+	RefundAmount    string `json:"refund_amount"`
+}

@@ -338,6 +338,12 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 			return err
 		}
 
+		resultUser, err := srv.UserRepository.GetDetail(tx, resultRent.UserId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail user data")
+			return err
+		}
+		resultRent.User = resultUser
 		err = srv.Gomail.SendRefundedPayment(res, resultRent)
 		if err != nil {
 			logger.WithError(err).Error("failed to send payment refunded email")

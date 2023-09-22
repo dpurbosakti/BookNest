@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"sync"
 	"time"
 
 	jwt5 "github.com/golang-jwt/jwt/v5"
@@ -33,6 +34,7 @@ type RentService struct {
 	DB             *gorm.DB
 	Gomail         *gomail.Gomail
 	Midtrans       *midtrans.Midtrans
+	mu             sync.Mutex
 }
 
 func NewRentService(rentRepository mr.RentRepository, bookRepository mb.BookRepository, userRepository mu.UserRepository, db *gorm.DB, gomail *gomail.Gomail, midtrans *midtrans.Midtrans) mr.RentService {
@@ -165,19 +167,15 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 			return err
 		}
 		resultRent.PaymentStatus = input.PaymentStatus
+		if input.PaymentStatus == "refund" {
+			resultRent.Status = "rejected"
+		}
 
 		resultRepo, err := srv.RentRepository.Update(tx, resultRent)
 		if err != nil {
 			logger.WithError(err).Error("failed to update rent")
 			return err
 		}
-
-		resultUser, err := srv.UserRepository.GetDetail(tx, resultRepo.UserId)
-		if err != nil {
-			logger.WithError(err).Error("failed to get user")
-			return err
-		}
-		resultRepo.User = resultUser
 
 		result = modelToResponse(resultRepo)
 
@@ -226,16 +224,10 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 			return errors.New("cannot accept, rent already rejected")
 		}
 
-		resultBook, err := srv.BookRepository.GetDetail(tx, resultRent.BookId)
-		if err != nil {
-			logger.WithError(err).Error("failed to get book")
-			return err
-		}
+		resultRent.Book.AvailableAt = &resultRent.ReturnedDate
+		resultRent.Book.IsAvailable = false
 
-		resultBook.AvailableAt = &resultRent.ReturnedDate
-		resultBook.IsAvailable = false
-
-		_, err = srv.BookRepository.Update(tx, resultBook)
+		_, err = srv.BookRepository.Update(tx, resultRent.Book)
 		if err != nil {
 			logger.WithError(err).Error("failed to update book")
 			return err
@@ -248,14 +240,8 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 			return err
 		}
 
-		resultUser, err := srv.UserRepository.GetDetail(tx, resultRent.UserId)
-		if err != nil {
-			logger.WithError(err).Error("failed to get detail rent data")
-			return err
-		}
-
 		oauthToken := oauth2.Token{
-			AccessToken: resultUser.OauthAccessToken,
+			AccessToken: resultRent.User.OauthAccessToken,
 		}
 
 		userData := ctx.MustGet("userData").(jwt5.MapClaims)
@@ -283,7 +269,7 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 				DisplayName: adminName,
 			},
 			Attendees: []*calendar.EventAttendee{
-				{Email: resultUser.Email, DisplayName: resultUser.Name},
+				{Email: resultRent.User.Email, DisplayName: resultRent.User.Name},
 			},
 		}
 
@@ -325,6 +311,9 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 			return errors.New("cannot reject, payment status is not settlement")
 		}
 
+		srv.mu.Lock()
+		defer srv.mu.Unlock()
+
 		res, err := srv.Midtrans.Refund(resultRent)
 		if err != nil {
 			logger.WithError(err).Error("failed to do refund")
@@ -338,17 +327,13 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 			return err
 		}
 
-		resultUser, err := srv.UserRepository.GetDetail(tx, resultRent.UserId)
-		if err != nil {
-			logger.WithError(err).Error("failed to get detail user data")
-			return err
-		}
-		resultRent.User = resultUser
 		err = srv.Gomail.SendRefundedPayment(res, resultRent)
 		if err != nil {
 			logger.WithError(err).Error("failed to send payment refunded email")
 			return err
 		}
+
+		logger.Info("end of db transaction")
 		return nil
 	})
 
@@ -358,4 +343,35 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 	}
 
 	return nil
+}
+
+func (srv *RentService) GetDetail(referenceId string) (*mr.RentResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "get_detail",
+		"scope":        "rent service",
+		"reference_id": referenceId,
+	})
+	logger.Info()
+
+	result := new(mr.RentResponse)
+
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+
+		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get rent data")
+			return err
+		}
+		result = modelToResponse(resultRent)
+
+		logger.Info("end of db transaction")
+		return nil
+	})
+	if err != nil {
+		logger.WithError(err).Error("failed to get detail rent data")
+		return nil, err
+	}
+
+	return result, nil
 }

@@ -51,4 +51,5 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	rentGroup.POST("", p.Rent.Create)
 	rentGroup.POST("/:reference_id/accept", middlewares.AdminAuthorization(), p.Rent.Accept)
 	rentGroup.POST("/:reference_id/reject", middlewares.AdminAuthorization(), p.Rent.Reject)
+	rentGroup.GET("/:reference_id", p.Rent.GetDetail)
 }

@@ -8,6 +8,9 @@ import (
 
 type RentHandler interface {
 	Create(c *gin.Context)
+	Accept(c *gin.Context)
+	Reject(c *gin.Context)
+	GetDetail(c *gin.Context)
 }
 
 type RentService interface {
@@ -16,6 +19,7 @@ type RentService interface {
 	Update(input *RentUpdateRequest) (*RentResponse, error)
 	Accept(ctx *gin.Context, referenceId string) error
 	Reject(ctx *gin.Context, referenceId string) error
+	GetDetail(referenceId string) (*RentResponse, error)
 }
 type RentRepository interface {
 	Create(tx *gorm.DB, input *Rent) (*Rent, error)

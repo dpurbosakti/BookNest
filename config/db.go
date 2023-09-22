@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLog "gorm.io/gorm/logger"
 )
 
 type DbConf struct {
@@ -41,7 +42,9 @@ func InitDb() (DB *gorm.DB) {
 		gormD = postgres.Open(postgresDsnBuilder(Cfg.DbConf))
 	}
 
-	db, err := gorm.Open(gormD, &gorm.Config{})
+	db, err := gorm.Open(gormD, &gorm.Config{
+		Logger: gormLog.Default.LogMode(gormLog.Info),
+	})
 	if err != nil {
 		logger.WithFields(logrus.Fields{
 			"type":    "db",
@@ -58,7 +61,6 @@ func InitDb() (DB *gorm.DB) {
 			"status": "done",
 		}).Info("instantiation")
 	}
-
 	return DB
 }
 

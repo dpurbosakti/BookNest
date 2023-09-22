@@ -139,3 +139,32 @@ func (hdl *RentHandler) Reject(c *gin.Context) {
 	})
 
 }
+
+func (hdl *RentHandler) GetDetail(c *gin.Context) {
+	id := c.Param("reference_id")
+
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "reject",
+		"scope":        "rent handler",
+		"reference_id": id,
+	})
+
+	if id == "" {
+		logger.Warn("no reference id provided")
+		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
+		return
+	}
+
+	data, errGet := hdl.RentService.GetDetail(id)
+
+	if errGet != nil {
+		logger.WithError(errGet).Error("failed to reject rent")
+		c.JSON(http.StatusInternalServerError, gin.H{"message": errGet.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, hh.ResponseData{
+		Message: "success",
+		Data:    data,
+	})
+}

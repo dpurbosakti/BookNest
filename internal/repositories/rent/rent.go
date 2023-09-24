@@ -2,6 +2,7 @@ package rent
 
 import (
 	mr "book-nest/internal/models/rent"
+	"book-nest/utils/pagination"
 	"errors"
 	"fmt"
 
@@ -46,4 +47,13 @@ func (repo *RentRepository) Update(tx *gorm.DB, input *mr.Rent) (*mr.Rent, error
 	}
 
 	return input, nil
+}
+
+func (repo *RentRepository) GetList(tx *gorm.DB, page pagination.Pagination) (pagination.Pagination, error) {
+	var rents []mr.Rent
+
+	tx.Scopes(pagination.Paginate(rents, &page, tx)).Find(&rents)
+	page.Rows = rents
+
+	return page, nil
 }

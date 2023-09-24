@@ -7,6 +7,7 @@ import (
 	mr "book-nest/internal/models/rent"
 	mu "book-nest/internal/models/user"
 	ch "book-nest/utils/calendarhelper"
+	"book-nest/utils/pagination"
 	"context"
 	"crypto/rand"
 	"errors"
@@ -371,6 +372,32 @@ func (srv *RentService) GetDetail(referenceId string) (*mr.RentResponse, error) 
 	if err != nil {
 		logger.WithError(err).Error("failed to get detail rent data")
 		return nil, err
+	}
+
+	return result, nil
+}
+
+func (srv *RentService) GetList(page pagination.Pagination) (pagination.Pagination, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "get_list",
+		"scope": "rent service",
+	})
+	var result pagination.Pagination
+	logger.Info("data page", page)
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		resultRepo, err := srv.RentRepository.GetList(tx, page)
+		if err != nil {
+			logger.WithError(err).Error("failed to get list")
+			return err
+		}
+		result = resultRepo
+		logger.Info("end of db transaction")
+		return nil
+	})
+	if err != nil {
+		logger.Error("failed to get list")
+		return result, err
 	}
 
 	return result, nil

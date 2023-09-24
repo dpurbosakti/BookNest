@@ -1,6 +1,8 @@
 package rent
 
 import (
+	"book-nest/utils/pagination"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -20,9 +22,11 @@ type RentService interface {
 	Accept(ctx *gin.Context, referenceId string) error
 	Reject(ctx *gin.Context, referenceId string) error
 	GetDetail(referenceId string) (*RentResponse, error)
+	GetList(page pagination.Pagination) (pagination.Pagination, error)
 }
 type RentRepository interface {
 	Create(tx *gorm.DB, input *Rent) (*Rent, error)
 	GetDetail(tx *gorm.DB, referenceId string) (*Rent, error)
 	Update(tx *gorm.DB, input *Rent) (*Rent, error)
+	GetList(tx *gorm.DB, page pagination.Pagination) (pagination.Pagination, error)
 }

@@ -5,7 +5,9 @@ import (
 	mr "book-nest/internal/models/rent"
 	hh "book-nest/utils/handlerhelper"
 	jh "book-nest/utils/jwthelper"
+	"book-nest/utils/pagination"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -166,5 +168,40 @@ func (hdl *RentHandler) GetDetail(c *gin.Context) {
 	c.JSON(http.StatusOK, hh.ResponseData{
 		Message: "success",
 		Data:    data,
+	})
+}
+
+func (hdl *RentHandler) GetList(c *gin.Context) {
+	var page pagination.Pagination
+	limitInt, _ := strconv.Atoi(c.Query("limit"))
+	pageInt, _ := strconv.Atoi(c.Query("page"))
+	page.Limit = limitInt
+	page.Page = pageInt
+	page.Sort = c.Query("sort")
+	page.Search = c.Query("search")
+	column := "user_id"
+	page.Column = &column
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "get_list",
+		"scope": "rent handler",
+		"data":  page,
+	})
+
+	result, err := hdl.RentService.GetList(page)
+	if err != nil {
+		logger.WithError(err).Error("failed to get list")
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	if result.TotalRows == 0 {
+		logger.Info("data is not found")
+		c.JSON(http.StatusNotFound, gin.H{"message": "data not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, hh.ResponseData{
+		Message: "get data rents success",
+		Data:    result,
 	})
 }

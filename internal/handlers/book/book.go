@@ -15,8 +15,8 @@ type BookHandler struct {
 	BookService mb.BookService
 }
 
-func NewBookHandler(userService mb.BookService) mb.BookHandler {
-	return &BookHandler{BookService: userService}
+func NewBookHandler(bookService mb.BookService) mb.BookHandler {
+	return &BookHandler{BookService: bookService}
 }
 
 func (hdl *BookHandler) Create(c *gin.Context) {

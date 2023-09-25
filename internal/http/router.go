@@ -52,10 +52,16 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	rentGroup.POST("/:reference_id/accept", middlewares.AdminAuthorization(), p.Rent.Accept)
 	rentGroup.POST("/:reference_id/reject", middlewares.AdminAuthorization(), p.Rent.Reject)
 	rentGroup.GET("/:reference_id", p.Rent.GetDetail)
-	rentGroup.GET("/:reference_id", middlewares.AdminAuthorization(), p.Rent.GetList)
+	rentGroup.GET("", middlewares.AdminAuthorization(), p.Rent.GetList)
 
 	// addresss
 	addressGroup := r.Group("/address")
 	addressGroup.Use(middlewares.Authentication())
-	rentGroup.POST("", p.Address.Create)
+	addressGroup.POST("", p.Address.Create)
+
+	// couriers
+	couriersGroup := r.Group("/couriers")
+	couriersGroup.Use(middlewares.Authentication())
+	couriersGroup.GET("/biteship", p.Courier.GetBiteshipCourier)
+	couriersGroup.GET("", p.Courier.GetList)
 }

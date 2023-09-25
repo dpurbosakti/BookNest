@@ -34,6 +34,7 @@ type Config struct {
 	GithubConf   GithubConf
 	JwtConf      JwtConf
 	MidtransConf MidtransConf
+	BiteshipConf BiteshipConf
 }
 
 var Cfg *Config

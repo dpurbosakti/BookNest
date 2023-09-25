@@ -45,3 +45,7 @@ midtransConf:
   merchantID:
   clientKey:
   serverKey:
+
+biteshipConf:
+  baseUrl:
+  serverKey: 

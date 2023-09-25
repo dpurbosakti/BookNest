@@ -25,13 +25,19 @@ import (
 	rentHdl "book-nest/internal/handlers/rent"
 	rentRepo "book-nest/internal/repositories/rent"
 	rentSrv "book-nest/internal/services/rent"
+
+	// address
+	addressHdl "book-nest/internal/handlers/address"
+	addressRepo "book-nest/internal/repositories/address"
+	addressSrv "book-nest/internal/services/address"
 )
 
 type Presenter struct {
-	Auth *authHdl.AuthHandler
-	User *userHdl.UserHandler
-	Book *bookHdl.BookHandler
-	Rent *rentHdl.RentHandler
+	Auth    *authHdl.AuthHandler
+	User    *userHdl.UserHandler
+	Book    *bookHdl.BookHandler
+	Rent    *rentHdl.RentHandler
+	Address *addressHdl.AddressHandler
 }
 
 func NewPresenter(db *gorm.DB) *Presenter {
@@ -59,10 +65,16 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	rs := rentSrv.NewRentService(rr, br, ur, db, gomail, midtrans)
 	rh := rentHdl.NewRentHandler(rs)
 
+	// address
+	adr := addressRepo.NewAddressRepository()
+	ads := addressSrv.NewAddressService(adr, db)
+	adh := addressHdl.NewAddressHandler(ads)
+
 	return &Presenter{
-		Auth: ah.(*authHdl.AuthHandler),
-		User: uh.(*userHdl.UserHandler),
-		Book: bh.(*bookHdl.BookHandler),
-		Rent: rh.(*rentHdl.RentHandler),
+		Auth:    ah.(*authHdl.AuthHandler),
+		User:    uh.(*userHdl.UserHandler),
+		Book:    bh.(*bookHdl.BookHandler),
+		Rent:    rh.(*rentHdl.RentHandler),
+		Address: adh.(*addressHdl.AddressHandler),
 	}
 }

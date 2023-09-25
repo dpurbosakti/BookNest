@@ -14,9 +14,9 @@ type BookService struct {
 	DB             *gorm.DB
 }
 
-func NewBookService(userRepository mb.BookRepository, db *gorm.DB) mb.BookService {
+func NewBookService(bookRepository mb.BookRepository, db *gorm.DB) mb.BookService {
 	return &BookService{
-		BookRepository: userRepository,
+		BookRepository: bookRepository,
 		DB:             db,
 	}
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"book-nest/clients/biteship"
 	"book-nest/clients/gomail"
 	"book-nest/clients/midtrans"
 
@@ -30,6 +31,11 @@ import (
 	addressHdl "book-nest/internal/handlers/address"
 	addressRepo "book-nest/internal/repositories/address"
 	addressSrv "book-nest/internal/services/address"
+
+	// couriers
+	courierHdl "book-nest/internal/handlers/courier"
+	courierRepo "book-nest/internal/repositories/courier"
+	courierSrv "book-nest/internal/services/courier"
 )
 
 type Presenter struct {
@@ -38,12 +44,14 @@ type Presenter struct {
 	Book    *bookHdl.BookHandler
 	Rent    *rentHdl.RentHandler
 	Address *addressHdl.AddressHandler
+	Courier *courierHdl.CourierHandler
 }
 
 func NewPresenter(db *gorm.DB) *Presenter {
 	// clients
 	gomail := gomail.NewGomailClient()
 	midtrans := midtrans.NewMidtransClient()
+	biteship := biteship.NewBiteshipClient()
 
 	// users
 	ur := userRepo.NewUserRepository()
@@ -70,11 +78,17 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	ads := addressSrv.NewAddressService(adr, db)
 	adh := addressHdl.NewAddressHandler(ads)
 
+	// couriers
+	cr := courierRepo.NewCourierRepository()
+	cs := courierSrv.NewCourierService(cr, db, biteship)
+	ch := courierHdl.NewCourierHandler(cs)
+
 	return &Presenter{
 		Auth:    ah.(*authHdl.AuthHandler),
 		User:    uh.(*userHdl.UserHandler),
 		Book:    bh.(*bookHdl.BookHandler),
 		Rent:    rh.(*rentHdl.RentHandler),
 		Address: adh.(*addressHdl.AddressHandler),
+		Courier: ch.(*courierHdl.CourierHandler),
 	}
 }

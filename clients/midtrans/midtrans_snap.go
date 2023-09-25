@@ -18,18 +18,21 @@ import (
 type Midtrans struct {
 	ClientSnap *snap.Client
 	ClientCore *coreapi.Client
+	ServerKey  string
 }
 
 func NewMidtransClient() *Midtrans {
+	serverKey := config.Cfg.MidtransConf.ServerKey
 	s := snap.Client{}
-	s.New(config.Cfg.MidtransConf.ServerKey, midtrans.Sandbox)
+	s.New(serverKey, midtrans.Sandbox)
 
 	c := coreapi.Client{}
-	c.New(config.Cfg.MidtransConf.ServerKey, midtrans.Sandbox)
+	c.New(serverKey, midtrans.Sandbox)
 
 	return &Midtrans{
 		ClientSnap: &s,
 		ClientCore: &c,
+		ServerKey:  serverKey,
 	}
 }
 
@@ -67,7 +70,7 @@ func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
 		return nil, err
 	}
 
-	req.SetBasicAuth(config.Cfg.MidtransConf.ServerKey, "")
+	req.SetBasicAuth(m.ServerKey, "")
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
 

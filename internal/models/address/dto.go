@@ -28,3 +28,11 @@ type AddressResponse struct {
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at"`
 }
+
+type AddressUpdateRequest struct {
+	Address    *string  `json:"address"`
+	Notes      *string  `json:"notes"`
+	Latitude   *float64 `json:"latitude"`
+	Longitude  *float64 `json:"longitude"`
+	PostalCode *string  `json:"postal_code"`
+}

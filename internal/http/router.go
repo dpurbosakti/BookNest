@@ -58,6 +58,8 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	addressGroup := r.Group("/address")
 	addressGroup.Use(middlewares.Authentication())
 	addressGroup.POST("", p.Address.Create)
+	addressGroup.GET("/:id", p.Address.GetDetail)
+	addressGroup.PUT("/:id", p.Address.Update)
 
 	// couriers
 	couriersGroup := r.Group("/couriers")

@@ -4,7 +4,6 @@ import (
 	"book-nest/config"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 )
@@ -48,8 +47,6 @@ func (b *Biteship) GetListCourier() (*BiteshipCourierResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("KEY: ", b.ServerKey)
-	fmt.Println("BODY: ", string(body))
 
 	if !biteshipCourierResponse.Success {
 		return nil, errors.New(biteshipCourierResponse.Error)

@@ -19,3 +19,25 @@ type Address struct {
 	UpdatedAt  time.Time      `json:"updated_at"`
 	DeletedAt  gorm.DeletedAt `json:"deleted_at"`
 }
+
+func (a *Address) Copier(input *AddressUpdateRequest) {
+	if input.Address != nil {
+		a.Address = *input.Address
+	}
+
+	if input.Notes != nil {
+		a.Notes = *input.Notes
+	}
+
+	if input.Latitude != nil {
+		a.Latitude = *input.Latitude
+	}
+
+	if input.Longitude != nil {
+		a.Longitude = *input.Longitude
+	}
+
+	if input.PostalCode != nil {
+		a.PostalCode = *input.PostalCode
+	}
+}

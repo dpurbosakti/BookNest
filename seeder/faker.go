@@ -48,6 +48,17 @@ _:
 	return title
 }
 
+func generateNumber(n int) uint {
+	if n == 0 {
+		n = 1
+	}
+
+	rand.Seed(time.Now().UnixNano())
+
+	randomUint := uint(rand.Intn(10) + 1)
+	return randomUint
+}
+
 func bookFaker(db *gorm.DB, n uint) (result []book.Book) {
 	for i := 1; i < int(n); i++ {
 		tmp := book.Book{
@@ -55,6 +66,9 @@ func bookFaker(db *gorm.DB, n uint) (result []book.Book) {
 			Title:         bookTitles[i],
 			Author:        faker.FirstNameFemale(),
 			RentFeePerDay: generateFee(),
+			Length:        generateNumber(10),
+			Width:         generateNumber(10),
+			Height:        generateNumber(10),
 			IsAvailable:   true,
 			AvailableAt:   nil,
 			CreatedAt:     time.Time{},

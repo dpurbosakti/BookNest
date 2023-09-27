@@ -3,6 +3,7 @@ package rent
 import (
 	"book-nest/clients/gomail"
 	"book-nest/clients/midtrans"
+	"book-nest/constant"
 	mb "book-nest/internal/models/book"
 	mr "book-nest/internal/models/rent"
 	mu "book-nest/internal/models/user"
@@ -168,7 +169,7 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 			return err
 		}
 		resultRent.PaymentStatus = input.PaymentStatus
-		if input.PaymentStatus == "refund" {
+		if input.PaymentStatus == constant.PaymentRefund {
 			resultRent.Status = "rejected"
 		}
 
@@ -180,7 +181,7 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 
 		result = modelToResponse(resultRepo)
 
-		if input.PaymentStatus == "settlement" {
+		if input.PaymentStatus == constant.PaymentSettlement {
 			err := srv.Gomail.SendSuccessPayment(input, resultRepo)
 			if err != nil {
 				logger.WithError(err).Error("failed to send payment success email")
@@ -215,7 +216,7 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 			return err
 		}
 
-		if resultRent.PaymentStatus != PaymentSettlement {
+		if resultRent.PaymentStatus != constant.PaymentSettlement {
 			logger.Error("cannot accpet, payment status is not settlement")
 			return errors.New("cannot accpet, payment status is not settlement")
 		}
@@ -307,7 +308,7 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 			return err
 		}
 
-		if resultRent.PaymentStatus != PaymentSettlement {
+		if resultRent.PaymentStatus != constant.PaymentSettlement {
 			logger.Error("cannot reject, payment status is not settlement")
 			return errors.New("cannot reject, payment status is not settlement")
 		}

@@ -11,6 +11,9 @@ type Book struct {
 	Title         string         `json:"title" gorm:"type:varchar(250)"`
 	Author        string         `json:"author" gorm:"type:varchar(250)"`
 	RentFeePerDay float64        `json:"rent_fee_per_day"`
+	Length        uint           `json:"length"`
+	Width         uint           `json:"width"`
+	Height        uint           `json:"height"`
 	IsAvailable   bool           `json:"is_available" gorm:"default:true"`
 	AvailableAt   *time.Time     `json:"available_at"`
 	CreatedAt     time.Time      `json:"created_at"`
@@ -29,5 +32,17 @@ func (b *Book) Copier(input *BookUpdateRequest) {
 
 	if input.RentFeePerDay != nil {
 		b.RentFeePerDay = *input.RentFeePerDay
+	}
+
+	if input.Length != nil {
+		b.Length = *input.Length
+	}
+
+	if input.Width != nil {
+		b.Width = *input.Width
+	}
+
+	if input.Height != nil {
+		b.Height = *input.Height
 	}
 }

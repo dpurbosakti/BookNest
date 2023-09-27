@@ -34,9 +34,11 @@ func (srv *CourierService) GetBiteshipCourier() error {
 		return err
 	}
 
+	instantCouriers := GetInstantCourierOnly(biteshipResp.Couriers)
+
 	err = srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.WithField("data", biteshipResp.Couriers).Info("db transaction begin")
-		err := srv.CourierRepository.Create(tx, &biteshipResp.Couriers)
+		err := srv.CourierRepository.Create(tx, &instantCouriers)
 		if err != nil {
 			logger.WithError(err).Error("failed to create courier")
 			return err

@@ -2,6 +2,7 @@ package courier
 
 import (
 	"book-nest/clients/biteship"
+	i "book-nest/internal/interfaces"
 	mc "book-nest/internal/models/courier"
 	"errors"
 
@@ -10,14 +11,18 @@ import (
 )
 
 type CourierService struct {
-	CourierRepository mc.CourierRepository
+	CourierRepository i.CourierRepository
+	AddressRepository i.AddressRepository
+	RentRepository    i.RentRepository
 	DB                *gorm.DB
 	Biteship          *biteship.Biteship
 }
 
-func NewCourierService(courierRepository mc.CourierRepository, db *gorm.DB, biteship *biteship.Biteship) mc.CourierService {
+func NewCourierService(courierRepository i.CourierRepository, addressRepository i.AddressRepository, rentRepository i.RentRepository, db *gorm.DB, biteship *biteship.Biteship) i.CourierService {
 	return &CourierService{
 		CourierRepository: courierRepository,
+		AddressRepository: addressRepository,
+		RentRepository:    rentRepository,
 		DB:                db,
 		Biteship:          biteship,
 	}
@@ -83,4 +88,53 @@ func (srv *CourierService) GetList() ([]mc.Courier, error) {
 
 	return result, nil
 
+}
+
+func (srv *CourierService) CheckRates(referenceId string) (*biteship.BiteshipCheckRatesResponse, error) {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":         "check_rates",
+		"scope":        "courier service",
+		"reference_id": referenceId,
+	})
+	logger.Info()
+	result := new(biteship.BiteshipCheckRatesResponse)
+
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail rent")
+			return err
+		}
+		if resultRent == nil {
+			return errors.New("rent not found")
+		}
+
+		resultAddress, err := srv.AddressRepository.GetByUserId(tx, resultRent.UserId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail user")
+			return err
+		}
+
+		resultCourier, err := srv.CourierRepository.GetList(tx)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail user")
+			return err
+		}
+		payload := checkRatesPayloadBuilder(resultRent, *resultAddress, getCouriersName(resultCourier))
+
+		res, err := srv.Biteship.CheckRates(payload)
+		if err != nil {
+			return err
+		}
+		result = res
+		logger.Info("end of db transaction")
+		return nil
+	})
+	if err != nil {
+		logger.Error("failed to check rates")
+		return nil, err
+	}
+
+	return result, nil
 }

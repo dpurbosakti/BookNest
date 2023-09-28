@@ -1,6 +1,7 @@
 package book
 
 import (
+	i "book-nest/internal/interfaces"
 	mb "book-nest/internal/models/book"
 	"book-nest/utils/pagination"
 	"errors"
@@ -12,7 +13,7 @@ import (
 type BookRepository struct {
 }
 
-func NewBookRepository() mb.BookRepository {
+func NewBookRepository() i.BookRepository {
 	return &BookRepository{}
 }
 

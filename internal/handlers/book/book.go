@@ -1,6 +1,7 @@
 package book
 
 import (
+	i "book-nest/internal/interfaces"
 	mb "book-nest/internal/models/book"
 	hh "book-nest/utils/handlerhelper"
 	"book-nest/utils/pagination"
@@ -12,10 +13,10 @@ import (
 )
 
 type BookHandler struct {
-	BookService mb.BookService
+	BookService i.BookService
 }
 
-func NewBookHandler(bookService mb.BookService) mb.BookHandler {
+func NewBookHandler(bookService i.BookService) i.BookHandler {
 	return &BookHandler{BookService: bookService}
 }
 

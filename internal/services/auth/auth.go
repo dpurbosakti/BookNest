@@ -1,8 +1,8 @@
 package auth
 
 import (
+	i "book-nest/internal/interfaces"
 	ma "book-nest/internal/models/auth"
-	mu "book-nest/internal/models/user"
 	jh "book-nest/utils/jwthelper"
 	ph "book-nest/utils/passwordhelper"
 	"errors"
@@ -13,12 +13,12 @@ import (
 )
 
 type AuthService struct {
-	AuthRepository ma.AuthRepository
-	UserRepository mu.UserRepository
+	AuthRepository i.AuthRepository
+	UserRepository i.UserRepository
 	DB             *gorm.DB
 }
 
-func NewAuthService(authRepository ma.AuthRepository, userRepository mu.UserRepository, db *gorm.DB) ma.AuthService {
+func NewAuthService(authRepository i.AuthRepository, userRepository i.UserRepository, db *gorm.DB) i.AuthService {
 	return &AuthService{
 		AuthRepository: authRepository,
 		UserRepository: userRepository,

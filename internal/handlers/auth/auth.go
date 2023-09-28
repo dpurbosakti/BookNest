@@ -2,6 +2,7 @@ package auth
 
 import (
 	"book-nest/config"
+	i "book-nest/internal/interfaces"
 	ma "book-nest/internal/models/auth"
 	hh "book-nest/utils/handlerhelper"
 	"encoding/json"
@@ -15,13 +16,13 @@ import (
 )
 
 type AuthHandler struct {
-	AuthService ma.AuthService
+	AuthService i.AuthService
 	GoogleConf  *oauth2.Config
 	TwitterConf *oauth2.Config
 	GithubConf  *oauth2.Config
 }
 
-func NewAuthHandler(authService ma.AuthService) ma.AuthHandler {
+func NewAuthHandler(authService i.AuthService) i.AuthHandler {
 	return &AuthHandler{
 		AuthService: authService,
 		GoogleConf:  config.GetGoogleConfig(),

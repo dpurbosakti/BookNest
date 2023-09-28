@@ -1,6 +1,7 @@
 package user
 
 import (
+	i "book-nest/internal/interfaces"
 	mu "book-nest/internal/models/user"
 	"book-nest/utils/pagination"
 	"errors"
@@ -13,7 +14,7 @@ import (
 type UserRepository struct {
 }
 
-func NewUserRepository() mu.UserRepository {
+func NewUserRepository() i.UserRepository {
 	return &UserRepository{}
 }
 

@@ -1,6 +1,7 @@
 package user
 
 import (
+	i "book-nest/internal/interfaces"
 	mu "book-nest/internal/models/user"
 	hh "book-nest/utils/handlerhelper"
 	jh "book-nest/utils/jwthelper"
@@ -13,10 +14,10 @@ import (
 )
 
 type UserHandler struct {
-	UserService mu.UserService
+	UserService i.UserService
 }
 
-func NewUserHandler(userService mu.UserService) mu.UserHandler {
+func NewUserHandler(userService i.UserService) i.UserHandler {
 	return &UserHandler{UserService: userService}
 }
 

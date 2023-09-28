@@ -9,15 +9,17 @@ import (
 	"net/http"
 	"strconv"
 
+	i "book-nest/internal/interfaces"
+
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
 type RentHandler struct {
-	RentService mr.RentService
+	RentService i.RentService
 }
 
-func NewRentHandler(rentService mr.RentService) mr.RentHandler {
+func NewRentHandler(rentService i.RentService) i.RentHandler {
 	return &RentHandler{RentService: rentService}
 }
 

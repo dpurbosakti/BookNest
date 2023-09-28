@@ -1,7 +1,7 @@
 package courier
 
 import (
-	mc "book-nest/internal/models/courier"
+	i "book-nest/internal/interfaces"
 	hh "book-nest/utils/handlerhelper"
 	"net/http"
 
@@ -10,10 +10,10 @@ import (
 )
 
 type CourierHandler struct {
-	CourierService mc.CourierService
+	CourierService i.CourierService
 }
 
-func NewCourierHandler(courierService mc.CourierService) mc.CourierHandler {
+func NewCourierHandler(courierService i.CourierService) i.CourierHandler {
 	return &CourierHandler{CourierService: courierService}
 }
 

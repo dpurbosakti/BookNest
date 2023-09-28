@@ -1,6 +1,7 @@
 package courier
 
 import (
+	i "book-nest/internal/interfaces"
 	mc "book-nest/internal/models/courier"
 	"errors"
 
@@ -10,7 +11,7 @@ import (
 type CourierRepository struct {
 }
 
-func NewCourierRepository() mc.CourierRepository {
+func NewCourierRepository() i.CourierRepository {
 	return &CourierRepository{}
 }
 

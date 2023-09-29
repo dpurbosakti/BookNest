@@ -4,8 +4,8 @@ import (
 	"book-nest/clients/biteship"
 	"book-nest/constant"
 	mad "book-nest/internal/models/address"
+	mb "book-nest/internal/models/book"
 	mc "book-nest/internal/models/courier"
-	mr "book-nest/internal/models/rent"
 )
 
 func GetInstantCourierOnly(input []mc.Courier) (result []mc.Courier) {
@@ -17,7 +17,7 @@ func GetInstantCourierOnly(input []mc.Courier) (result []mc.Courier) {
 	return result
 }
 
-func checkRatesPayloadBuilder(rent *mr.Rent, address mad.Address, couriers string) *biteship.BiteshipCheckRatesRequest {
+func checkRatesPayloadBuilder(book *mb.Book, address mad.Address, couriers string) *biteship.BiteshipCheckRatesRequest {
 	return &biteship.BiteshipCheckRatesRequest{
 		OriginLatitude:       constant.AdminLatitude,
 		OriginLongitude:      constant.AdminLongitude,
@@ -26,12 +26,12 @@ func checkRatesPayloadBuilder(rent *mr.Rent, address mad.Address, couriers strin
 		Couriers:             couriers,
 		Items: []biteship.Item{
 			{
-				Name:        rent.Book.Title,
+				Name:        book.Title,
 				Description: "rent",
-				Value:       int64(rent.Fee),
-				Length:      int64(rent.Book.Length),
-				Width:       int64(rent.Book.Width),
-				Height:      int64(rent.Book.Height),
+				Value:       int64(book.RentFeePerDay),
+				Length:      int64(book.Length),
+				Width:       int64(book.Width),
+				Height:      int64(book.Height),
 				Quantity:    1,
 			},
 		},

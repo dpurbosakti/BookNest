@@ -6,6 +6,7 @@ import (
 	mc "book-nest/internal/models/courier"
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -13,16 +14,18 @@ import (
 type CourierService struct {
 	CourierRepository i.CourierRepository
 	AddressRepository i.AddressRepository
+	BookRepository    i.BookRepository
 	RentRepository    i.RentRepository
 	DB                *gorm.DB
 	Biteship          *biteship.Biteship
 }
 
-func NewCourierService(courierRepository i.CourierRepository, addressRepository i.AddressRepository, rentRepository i.RentRepository, db *gorm.DB, biteship *biteship.Biteship) i.CourierService {
+func NewCourierService(courierRepository i.CourierRepository, addressRepository i.AddressRepository, rentRepository i.RentRepository, bookRepository i.BookRepository, db *gorm.DB, biteship *biteship.Biteship) i.CourierService {
 	return &CourierService{
 		CourierRepository: courierRepository,
 		AddressRepository: addressRepository,
 		RentRepository:    rentRepository,
+		BookRepository:    bookRepository,
 		DB:                db,
 		Biteship:          biteship,
 	}
@@ -90,38 +93,38 @@ func (srv *CourierService) GetList() ([]mc.Courier, error) {
 
 }
 
-func (srv *CourierService) CheckRates(referenceId string) (*biteship.BiteshipCheckRatesResponse, error) {
+func (srv *CourierService) CheckRates(userId uuid.UUID, bookId uint) (*biteship.BiteshipCheckRatesResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
-		"func":         "check_rates",
-		"scope":        "courier service",
-		"reference_id": referenceId,
+		"func":    "check_rates",
+		"scope":   "courier service",
+		"user_id": userId,
 	})
 	logger.Info()
 	result := new(biteship.BiteshipCheckRatesResponse)
 
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		resultBook, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail rent")
+			logger.WithError(err).Error("failed to get detail book")
 			return err
 		}
-		if resultRent == nil {
-			return errors.New("rent not found")
+		if resultBook == nil {
+			return errors.New("book not found")
 		}
 
-		resultAddress, err := srv.AddressRepository.GetByUserId(tx, resultRent.UserId)
+		resultAddress, err := srv.AddressRepository.GetByUserId(tx, userId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail user")
+			logger.WithError(err).Error("failed to get detail address")
 			return err
 		}
 
 		resultCourier, err := srv.CourierRepository.GetList(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail user")
+			logger.WithError(err).Error("failed to get list courier")
 			return err
 		}
-		payload := checkRatesPayloadBuilder(resultRent, *resultAddress, getCouriersName(resultCourier))
+		payload := checkRatesPayloadBuilder(resultBook, *resultAddress, getCouriersName(resultCourier))
 
 		res, err := srv.Biteship.CheckRates(payload)
 		if err != nil {

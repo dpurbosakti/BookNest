@@ -1,6 +1,7 @@
 package rent
 
 import (
+	i "book-nest/internal/interfaces"
 	mr "book-nest/internal/models/rent"
 	"book-nest/utils/pagination"
 	"errors"
@@ -12,7 +13,7 @@ import (
 type RentRepository struct {
 }
 
-func NewRentRepository() mr.RentRepository {
+func NewRentRepository() i.RentRepository {
 	return &RentRepository{}
 }
 

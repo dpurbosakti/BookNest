@@ -1,6 +1,7 @@
 package address
 
 import (
+	i "book-nest/internal/interfaces"
 	mad "book-nest/internal/models/address"
 	"errors"
 
@@ -10,11 +11,11 @@ import (
 )
 
 type AddressService struct {
-	AddressRepository mad.AddressRepository
+	AddressRepository i.AddressRepository
 	DB                *gorm.DB
 }
 
-func NewAddressService(addressRepository mad.AddressRepository, db *gorm.DB) mad.AddressService {
+func NewAddressService(addressRepository i.AddressRepository, db *gorm.DB) i.AddressService {
 	return &AddressService{
 		AddressRepository: addressRepository,
 		DB:                db,

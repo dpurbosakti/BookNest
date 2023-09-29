@@ -2,6 +2,7 @@ package user
 
 import (
 	"book-nest/clients/gomail"
+	i "book-nest/internal/interfaces"
 	mu "book-nest/internal/models/user"
 	"book-nest/utils/pagination"
 	ph "book-nest/utils/passwordhelper"
@@ -13,12 +14,12 @@ import (
 )
 
 type UserService struct {
-	UserRepository mu.UserRepository
+	UserRepository i.UserRepository
 	DB             *gorm.DB
 	Gomail         *gomail.Gomail
 }
 
-func NewUserService(userRepository mu.UserRepository, db *gorm.DB, gomail *gomail.Gomail) mu.UserService {
+func NewUserService(userRepository i.UserRepository, db *gorm.DB, gomail *gomail.Gomail) i.UserService {
 	return &UserService{
 		UserRepository: userRepository,
 		DB:             db,

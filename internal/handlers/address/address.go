@@ -1,6 +1,7 @@
 package address
 
 import (
+	i "book-nest/internal/interfaces"
 	mad "book-nest/internal/models/address"
 	hh "book-nest/utils/handlerhelper"
 	jh "book-nest/utils/jwthelper"
@@ -13,10 +14,10 @@ import (
 )
 
 type AddressHandler struct {
-	AddressService mad.AddressService
+	AddressService i.AddressService
 }
 
-func NewAddressHandler(addressService mad.AddressService) mad.AddressHandler {
+func NewAddressHandler(addressService i.AddressService) i.AddressHandler {
 	return &AddressHandler{AddressService: addressService}
 }
 

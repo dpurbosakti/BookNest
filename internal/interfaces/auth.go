@@ -1,7 +1,8 @@
-package auth
+package interfaces
 
 import (
-	"book-nest/internal/models/user"
+	ma "book-nest/internal/models/auth"
+	mu "book-nest/internal/models/user"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -18,10 +19,10 @@ type AuthHandler interface {
 }
 
 type AuthService interface {
-	Login(input LoginRequest) (*string, error)
-	LoginByGoogle(input *GoogleResponse) (*string, error)
+	Login(input ma.LoginRequest) (*string, error)
+	LoginByGoogle(input *ma.GoogleResponse) (*string, error)
 }
 
 type AuthRepository interface {
-	Login(tx *gorm.DB, input LoginRequest) (*user.User, error)
+	Login(tx *gorm.DB, input ma.LoginRequest) (*mu.User, error)
 }

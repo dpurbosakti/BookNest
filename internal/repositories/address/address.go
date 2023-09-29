@@ -1,17 +1,19 @@
 package address
 
 import (
+	i "book-nest/internal/interfaces"
 	mad "book-nest/internal/models/address"
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AddressRepository struct {
 }
 
-func NewAddressRepository() mad.AddressRepository {
+func NewAddressRepository() i.AddressRepository {
 	return &AddressRepository{}
 }
 
@@ -41,4 +43,14 @@ func (repo *AddressRepository) GetDetail(tx *gorm.DB, addressId uint) (*mad.Addr
 	}
 
 	return book, nil
+}
+
+func (repo *AddressRepository) GetByUserId(tx *gorm.DB, userId uuid.UUID) (*mad.Address, error) {
+	address := new(mad.Address)
+	result := tx.Where("user_id = ?", userId).First(&address)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return address, nil
 }

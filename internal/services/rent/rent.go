@@ -4,9 +4,8 @@ import (
 	"book-nest/clients/gomail"
 	"book-nest/clients/midtrans"
 	"book-nest/constant"
-	mb "book-nest/internal/models/book"
+	i "book-nest/internal/interfaces"
 	mr "book-nest/internal/models/rent"
-	mu "book-nest/internal/models/user"
 	ch "book-nest/utils/calendarhelper"
 	"book-nest/utils/pagination"
 	"context"
@@ -30,16 +29,16 @@ import (
 )
 
 type RentService struct {
-	RentRepository mr.RentRepository
-	BookRepository mb.BookRepository
-	UserRepository mu.UserRepository
+	RentRepository i.RentRepository
+	BookRepository i.BookRepository
+	UserRepository i.UserRepository
 	DB             *gorm.DB
 	Gomail         *gomail.Gomail
 	Midtrans       *midtrans.Midtrans
 	mu             sync.Mutex
 }
 
-func NewRentService(rentRepository mr.RentRepository, bookRepository mb.BookRepository, userRepository mu.UserRepository, db *gorm.DB, gomail *gomail.Gomail, midtrans *midtrans.Midtrans) mr.RentService {
+func NewRentService(rentRepository i.RentRepository, bookRepository i.BookRepository, userRepository i.UserRepository, db *gorm.DB, gomail *gomail.Gomail, midtrans *midtrans.Midtrans) i.RentService {
 	return &RentService{
 		RentRepository: rentRepository,
 		BookRepository: bookRepository,

@@ -80,7 +80,7 @@ func NewPresenter(db *gorm.DB) *Presenter {
 
 	// couriers
 	cr := courierRepo.NewCourierRepository()
-	cs := courierSrv.NewCourierService(cr, db, biteship)
+	cs := courierSrv.NewCourierService(cr, adr, rr, br, db, biteship)
 	ch := courierHdl.NewCourierHandler(cs)
 
 	return &Presenter{

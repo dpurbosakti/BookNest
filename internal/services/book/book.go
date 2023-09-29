@@ -1,6 +1,7 @@
 package book
 
 import (
+	i "book-nest/internal/interfaces"
 	mb "book-nest/internal/models/book"
 	"book-nest/utils/pagination"
 	"errors"
@@ -10,11 +11,11 @@ import (
 )
 
 type BookService struct {
-	BookRepository mb.BookRepository
+	BookRepository i.BookRepository
 	DB             *gorm.DB
 }
 
-func NewBookService(bookRepository mb.BookRepository, db *gorm.DB) mb.BookService {
+func NewBookService(bookRepository i.BookRepository, db *gorm.DB) i.BookService {
 	return &BookService{
 		BookRepository: bookRepository,
 		DB:             db,

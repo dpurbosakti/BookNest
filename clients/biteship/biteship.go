@@ -2,6 +2,7 @@ package biteship
 
 import (
 	"book-nest/config"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -53,4 +54,45 @@ func (b *Biteship) GetListCourier() (*BiteshipCourierResponse, error) {
 	}
 
 	return biteshipCourierResponse, nil
+}
+
+func (b *Biteship) CheckRates(payload *BiteshipCheckRatesRequest) (*BiteshipCheckRatesResponse, error) {
+	url := b.BaseUrl + "/v1/rates/couriers"
+
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", b.ServerKey)
+	req.Header.Add("accept", "application/json")
+	req.Header.Add("content-type", "application/json")
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var biteshipCheckRatesResponse *BiteshipCheckRatesResponse
+	err = json.Unmarshal(body, &biteshipCheckRatesResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	if !biteshipCheckRatesResponse.Success {
+		return nil, errors.New(biteshipCheckRatesResponse.Error)
+	}
+
+	return biteshipCheckRatesResponse, nil
 }

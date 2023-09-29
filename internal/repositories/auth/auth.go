@@ -1,6 +1,7 @@
 package user
 
 import (
+	i "book-nest/internal/interfaces"
 	"book-nest/internal/models/auth"
 	"book-nest/internal/models/user"
 	"fmt"
@@ -11,7 +12,7 @@ import (
 type AuthRepository struct {
 }
 
-func NewAuthRepository() auth.AuthRepository {
+func NewAuthRepository() i.AuthRepository {
 	return &AuthRepository{}
 }
 

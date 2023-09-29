@@ -63,7 +63,10 @@ func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
 	url := fmt.Sprintf("https://api.sandbox.midtrans.com/v2/%s/refund", input.ReferenceId)
 
 	payload := payloadRefundBuilder(input)
-	jsonPayload, _ := json.Marshal(payload)
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
 	if err != nil {

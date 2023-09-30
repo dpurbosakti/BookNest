@@ -27,7 +27,7 @@ func (hdl *AddressHandler) Create(c *gin.Context) {
 	errBind := c.ShouldBindJSON(&addressReq)
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
-		"scope": "book handler",
+		"scope": "address handler",
 		"data":  addressReq,
 	})
 	if errBind != nil {

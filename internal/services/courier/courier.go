@@ -128,6 +128,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, bookId uint) (*biteship.
 
 		res, err := srv.Biteship.CheckRates(payload)
 		if err != nil {
+			logger.WithError(err).Error("failed to check rates")
 			return err
 		}
 		result = res

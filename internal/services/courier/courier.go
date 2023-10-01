@@ -93,7 +93,7 @@ func (srv *CourierService) GetList() ([]mc.Courier, error) {
 
 }
 
-func (srv *CourierService) CheckRates(userId uuid.UUID, bookId uint) (*biteship.BiteshipCheckRatesResponse, error) {
+func (srv *CourierService) CheckRates(userId uuid.UUID, input *mc.CheckRatesRequest) (*biteship.BiteshipCheckRatesResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":    "check_rates",
 		"scope":   "courier service",
@@ -104,7 +104,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, bookId uint) (*biteship.
 
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultBook, err := srv.BookRepository.GetDetail(tx, bookId)
+		resultBook, err := srv.BookRepository.GetDetail(tx, input.BookId)
 		if err != nil {
 			logger.WithError(err).Error("failed to get detail book")
 			return err
@@ -113,7 +113,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, bookId uint) (*biteship.
 			return errors.New("book not found")
 		}
 
-		resultAddress, err := srv.AddressRepository.GetByUserId(tx, userId)
+		resultAddress, err := srv.AddressRepository.GetDetail(tx, input.AddressId)
 		if err != nil {
 			logger.WithError(err).Error("failed to get detail address")
 			return err

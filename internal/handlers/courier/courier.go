@@ -85,7 +85,7 @@ func (hdl *CourierHandler) CheckRates(c *gin.Context) {
 	}
 	logger.WithField("user_id", userData.Id).Info()
 
-	result, err := hdl.CourierService.CheckRates(userData.Id, checkRatesReq.BookId)
+	result, err := hdl.CourierService.CheckRates(userData.Id, &checkRatesReq)
 
 	if err != nil {
 		logger.WithError(err).Error("failed to check rates courier")

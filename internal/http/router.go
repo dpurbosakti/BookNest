@@ -66,5 +66,5 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	couriersGroup.Use(middlewares.Authentication())
 	couriersGroup.GET("/biteship", p.Courier.GetBiteshipCourier)
 	couriersGroup.GET("", p.Courier.GetList)
-	couriersGroup.GET("checkrates", p.Courier.CheckRates)
+	couriersGroup.POST("/checkrates", p.Courier.CheckRates)
 }

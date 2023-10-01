@@ -18,7 +18,7 @@ type CourierHandler interface {
 type CourierService interface {
 	GetBiteshipCourier() error
 	GetList() ([]mc.Courier, error)
-	CheckRates(userId uuid.UUID, bookId uint) (*biteship.BiteshipCheckRatesResponse, error)
+	CheckRates(userId uuid.UUID, input *mc.CheckRatesRequest) (*biteship.BiteshipCheckRatesResponse, error)
 }
 
 type CourierRepository interface {

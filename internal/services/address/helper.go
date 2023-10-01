@@ -7,6 +7,7 @@ import (
 // mappers
 func requestToModel(input *mad.AddressCreateRequest) *mad.Address {
 	return &mad.Address{
+		UserId:     input.UserId,
 		Address:    input.Address,
 		Notes:      input.Notes,
 		Latitude:   input.Latitude,

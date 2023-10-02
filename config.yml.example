@@ -49,3 +49,7 @@ midtransConf:
 biteshipConf:
   baseUrl:
   serverKey: 
+
+xenditConf:
+  serverKey: 
+  callbackToken:

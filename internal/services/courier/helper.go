@@ -2,7 +2,7 @@ package courier
 
 import (
 	"book-nest/clients/biteship"
-	"book-nest/constant"
+	"book-nest/internal/constant"
 	mad "book-nest/internal/models/address"
 	mb "book-nest/internal/models/book"
 	mc "book-nest/internal/models/courier"

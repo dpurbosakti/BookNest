@@ -35,6 +35,7 @@ type Config struct {
 	JwtConf      JwtConf
 	MidtransConf MidtransConf
 	BiteshipConf BiteshipConf
+	XenditConf   XenditConf
 }
 
 var Cfg *Config

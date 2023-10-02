@@ -3,7 +3,7 @@ package rent
 import (
 	"book-nest/clients/gomail"
 	"book-nest/clients/midtrans"
-	"book-nest/constant"
+	"book-nest/internal/constant"
 	i "book-nest/internal/interfaces"
 	mr "book-nest/internal/models/rent"
 	ch "book-nest/utils/calendarhelper"

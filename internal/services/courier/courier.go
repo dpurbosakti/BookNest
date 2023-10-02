@@ -119,6 +119,11 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, input *mc.CheckRatesRequ
 			return err
 		}
 
+		if resultAddress.UserId != userId {
+			logger.Warn("Unauthorized")
+			return errors.New("Unauthorized")
+		}
+
 		resultCourier, err := srv.CourierRepository.GetList(tx)
 		if err != nil {
 			logger.WithError(err).Error("failed to get list courier")

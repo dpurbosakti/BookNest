@@ -53,7 +53,7 @@ func generateNumber(n int) uint {
 		n = 1
 	}
 
-	rand.Seed(time.Now().UnixNano())
+	rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	randomUint := uint(rand.Intn(10) + 1)
 	return randomUint

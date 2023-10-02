@@ -1,0 +1,59 @@
+name: BookNest
+version: 0.0.1
+
+httpConf:
+  host: localhost
+  port: 8080
+
+dbConf:
+  host: localhost
+  port: 5432
+  user: moko
+  password: passwordmoko
+  databasename: book-nest
+  maxOpenConns: 5
+  maxIdleConns: 5
+  maxIdleTime: 100
+  dialect: postgres
+
+emailConf:
+  email: altacapstonegroup3@gmail.com
+  password: ppvxpgjmyirnqmdm
+  host: smtp.gmail.com
+  port: 587
+
+googleConf:
+  clientID: 810998518065-i0kklrb6qs1gsp477mg6gt3v1edpjbgr.apps.googleusercontent.com
+  clientSecret: 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
+  redirectUrl: http://localhost:8080/auth/google/callback
+  state: random
+  tokenAccessUrl: https://www.googleapis.com/oauth2/v2/userinfo?access_token=
+
+twitterConf:
+  clientID: dXVJZGhlQWV3Z3czQ0NtdnMxajE6MTpjaQ
+  clientSecret: wMT7ElVQdFCPLqDZYjRQFLgvjLXVfZQZzdqxq2uIosKImYqONN
+  redirectUrl: http://127.0.0.1:8080/auth/twitter/callback
+  apiEndpoint: https://api.twitter.com/1.1/account/verify_credentials.json
+
+githubConf:
+  clientID: 0722f0786b9735b61335
+  clientSecret: a973d6b8b04cd04e28d32d40a90963a610c79504
+  redirectUrl: http://127.0.0.1:8080/auth/github/callback
+  tokenAccessUrl: https://api.github.com/user
+
+jwtConf: 
+  secretKey: "random"
+  expiredTimeInHour: 1000
+
+midtransConf:
+  merchantID: G386595264
+  clientKey:  SB-Mid-client-OQ5U-2F30dqLm4ow
+  serverKey:  SB-Mid-server-5DJ2l8dh1OLEEFXcNty0BXZE
+
+biteshipConf:
+  baseUrl: https://api.biteship.com
+  serverKey: "biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiYm9va25lc3QiLCJ1c2VySWQiOiI2NTEwYjg1ZTgzOWZjODFhMzMxZjljMDEiLCJpYXQiOjE2OTU2MDcyNTl9.QcD4bmDDbUZg1yXG5uq61tX1y5apSZzgqmL-9qjrdbc"
+
+xenditConf:
+  serverKey: xnd_development_Jbw0kXIepE6ayUDrTKEDfke9OZMYDvRdKwdNe805rHCazNayr6FT0nQdTVKx8I0
+  callbackToken: IqpNZPxyE7BTZWancpxzlz42iy9yJtzVN7G6MiIZN5lTKUFi

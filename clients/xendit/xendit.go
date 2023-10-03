@@ -2,7 +2,7 @@ package xendit
 
 import (
 	"book-nest/config"
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 	"context"
 	"fmt"
 	"reflect"
@@ -25,7 +25,7 @@ func NewXenditClient() *Xendit {
 	}
 }
 
-func (x Xendit) CreatePayment(input *mr.Rent) error {
+func (x Xendit) CreatePayment(input *mo.Order) error {
 	params := payment_request.PaymentRequestParameters{
 		ReferenceId: &input.ReferenceId,
 		Currency:    payment_request.PAYMENTREQUESTCURRENCY_IDR,

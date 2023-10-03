@@ -2,7 +2,7 @@ package midtrans
 
 import (
 	"book-nest/config"
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -36,7 +36,7 @@ func NewMidtransClient() *Midtrans {
 	}
 }
 
-func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
+func (m *Midtrans) CreatePayment(input *mo.Order) (*string, *string, error) {
 	logger := logrus.WithField("func", "create_payment")
 	logger.WithField("rent_id", input.Id).Info()
 	req := &snap.Request{
@@ -59,7 +59,7 @@ func (m *Midtrans) CreatePayment(input *mr.Rent) (*string, *string, error) {
 	return &res.Token, &res.RedirectURL, nil
 }
 
-func (m *Midtrans) Refund(input *mr.Rent) (*MidtransRefundResponse, error) {
+func (m *Midtrans) Refund(input *mo.Order) (*MidtransRefundResponse, error) {
 	url := fmt.Sprintf("https://api.sandbox.midtrans.com/v2/%s/refund", input.ReferenceId)
 
 	payload := payloadRefundBuilder(input)

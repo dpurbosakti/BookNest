@@ -1,23 +1,23 @@
-package rent
+package order
 
 import (
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const refLength = 6
 
 // mappers
-func requestToModel(input *mr.RentCreateRequest) *mr.Rent {
-	return &mr.Rent{
+func requestToModel(input *mo.OrderCreateRequest) *mo.Order {
+	return &mo.Order{
 		BookId:        input.BookId,
 		BorrowingDate: input.BorrowingDate,
 		ReturnedDate:  input.ReturnedDate,
 	}
 }
 
-func modelToResponse(input *mr.Rent) *mr.RentResponse {
-	return &mr.RentResponse{
+func modelToResponse(input *mo.Order) *mo.OrderResponse {
+	return &mo.OrderResponse{
 		Id:            input.Id,
 		ReferenceId:   input.ReferenceId,
 		UserId:        input.UserId,

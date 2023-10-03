@@ -1,11 +1,11 @@
-package rent
+package order
 
 import (
 	"book-nest/clients/gomail"
 	"book-nest/clients/midtrans"
 	"book-nest/internal/constant"
 	i "book-nest/internal/interfaces"
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 	ch "book-nest/utils/calendarhelper"
 	"book-nest/utils/pagination"
 	"context"
@@ -28,31 +28,31 @@ import (
 	"gorm.io/gorm"
 )
 
-type RentService struct {
-	RentRepository i.RentRepository
-	BookRepository i.BookRepository
-	UserRepository i.UserRepository
-	DB             *gorm.DB
-	Gomail         *gomail.Gomail
-	Midtrans       *midtrans.Midtrans
-	mu             sync.Mutex
+type OrderService struct {
+	OrderRepository i.OrderRepository
+	BookRepository  i.BookRepository
+	UserRepository  i.UserRepository
+	DB              *gorm.DB
+	Gomail          *gomail.Gomail
+	Midtrans        *midtrans.Midtrans
+	mu              sync.Mutex
 }
 
-func NewRentService(rentRepository i.RentRepository, bookRepository i.BookRepository, userRepository i.UserRepository, db *gorm.DB, gomail *gomail.Gomail, midtrans *midtrans.Midtrans) i.RentService {
-	return &RentService{
-		RentRepository: rentRepository,
-		BookRepository: bookRepository,
-		UserRepository: userRepository,
-		DB:             db,
-		Gomail:         gomail,
-		Midtrans:       midtrans,
+func NewOrderService(orderRepository i.OrderRepository, bookRepository i.BookRepository, userRepository i.UserRepository, db *gorm.DB, gomail *gomail.Gomail, midtrans *midtrans.Midtrans) i.OrderService {
+	return &OrderService{
+		OrderRepository: orderRepository,
+		BookRepository:  bookRepository,
+		UserRepository:  userRepository,
+		DB:              db,
+		Gomail:          gomail,
+		Midtrans:        midtrans,
 	}
 }
 
-func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*mr.RentResponse, error) {
+func (srv *OrderService) Create(input *mo.OrderCreateRequest, userId uuid.UUID) (*mo.OrderResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
-		"scope": "rent service",
+		"scope": "order service",
 	})
 
 	if input == nil {
@@ -60,7 +60,7 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 	}
 
 	logger.WithField("data", input)
-	result := new(mr.RentResponse)
+	result := new(mo.OrderResponse)
 	data := requestToModel(input)
 	data.UserId = userId
 	token := new(string)
@@ -87,9 +87,9 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 		refId := srv.GenerateReferenceId(tx)
 		data.ReferenceId = refId
 
-		resultRepo, err := srv.RentRepository.Create(tx, data)
+		resultRepo, err := srv.OrderRepository.Create(tx, data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create rent")
+			logger.WithError(err).Error("failed to create order")
 			return err
 		}
 
@@ -110,14 +110,14 @@ func (srv *RentService) Create(input *mr.RentCreateRequest, userId uuid.UUID) (*
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create rent")
+		logger.WithError(err).Error("failed to create order")
 		return nil, err
 	}
 
 	return result, nil
 }
 
-func (srv *RentService) GenerateReferenceId(tx *gorm.DB) string {
+func (srv *OrderService) GenerateReferenceId(tx *gorm.DB) string {
 	var sb strings.Builder
 
 	for {
@@ -139,19 +139,19 @@ func (srv *RentService) GenerateReferenceId(tx *gorm.DB) string {
 	}
 
 	refId := fmt.Sprintf("%s%s", time.Now().Format("20060102"), sb.String())
-	rent, _ := srv.RentRepository.GetDetail(tx, refId)
+	order, _ := srv.OrderRepository.GetDetail(tx, refId)
 	// check rent with reference id exist, if exist do GenerateReferenceId again
-	if rent != nil {
+	if order != nil {
 		return srv.GenerateReferenceId(tx)
 	}
 
 	return refId
 }
 
-func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, error) {
+func (srv *OrderService) Update(input *mo.OrderUpdateRequest) (*mo.OrderResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "update",
-		"scope": "rent service",
+		"scope": "order service",
 	})
 
 	if input == nil {
@@ -159,22 +159,22 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 	}
 
 	logger.WithField("data", input).Info()
-	result := new(mr.RentResponse)
+	result := new(mo.OrderResponse)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRent, err := srv.RentRepository.GetDetail(tx, input.ReferenceId)
+		resultOrder, err := srv.OrderRepository.GetDetail(tx, input.ReferenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get rent data")
+			logger.WithError(err).Error("failed to get order data")
 			return err
 		}
-		resultRent.PaymentStatus = input.PaymentStatus
+		resultOrder.PaymentStatus = input.PaymentStatus
 		if input.PaymentStatus == constant.PaymentRefund {
-			resultRent.Status = "rejected"
+			resultOrder.Status = "rejected"
 		}
 
-		resultRepo, err := srv.RentRepository.Update(tx, resultRent)
+		resultRepo, err := srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update rent")
+			logger.WithError(err).Error("failed to update order")
 			return err
 		}
 
@@ -192,57 +192,57 @@ func (srv *RentService) Update(input *mr.RentUpdateRequest) (*mr.RentResponse, e
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create rent")
+		logger.WithError(err).Error("failed to create order")
 		return nil, err
 	}
 
 	return result, nil
 }
 
-func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
+func (srv *OrderService) Accept(ctx *gin.Context, referenceId string) error {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "accept",
-		"scope":        "rent service",
+		"scope":        "order service",
 		"reference_id": referenceId,
 	})
 	logger.Info()
 
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get rent data")
+			logger.WithError(err).Error("failed to get order data")
 			return err
 		}
 
-		if resultRent.PaymentStatus != constant.PaymentSettlement {
+		if resultOrder.PaymentStatus != constant.PaymentSettlement {
 			logger.Error("cannot accpet, payment status is not settlement")
 			return errors.New("cannot accpet, payment status is not settlement")
 		}
 
-		if resultRent.Status == "rejected" {
+		if resultOrder.Status == "rejected" {
 			logger.Error("cannot accept, rent already rejected")
 			return errors.New("cannot accept, rent already rejected")
 		}
 
-		resultRent.Book.AvailableAt = &resultRent.ReturnedDate
-		resultRent.Book.IsAvailable = false
+		resultOrder.Book.AvailableAt = &resultOrder.ReturnedDate
+		resultOrder.Book.IsAvailable = false
 
-		_, err = srv.BookRepository.Update(tx, resultRent.Book)
+		_, err = srv.BookRepository.Update(tx, resultOrder.Book)
 		if err != nil {
 			logger.WithError(err).Error("failed to update book")
 			return err
 		}
 
-		resultRent.Status = "accepted"
-		_, err = srv.RentRepository.Update(tx, resultRent)
+		resultOrder.Status = "accepted"
+		_, err = srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update rent")
+			logger.WithError(err).Error("failed to update order")
 			return err
 		}
 
 		oauthToken := oauth2.Token{
-			AccessToken: resultRent.User.OauthAccessToken,
+			AccessToken: resultOrder.User.OauthAccessToken,
 		}
 
 		userData := ctx.MustGet("userData").(jwt5.MapClaims)
@@ -260,17 +260,17 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 			Summary:     "Rent returned date",
 			Description: "The day to return the book you rented",
 			Start: &calendar.EventDateTime{
-				DateTime: resultRent.ReturnedDate.Format(time.RFC3339),
+				DateTime: resultOrder.ReturnedDate.Format(time.RFC3339),
 			},
 			End: &calendar.EventDateTime{
-				DateTime: resultRent.ReturnedDate.Add(1 * time.Hour).Format(time.RFC3339),
+				DateTime: resultOrder.ReturnedDate.Add(1 * time.Hour).Format(time.RFC3339),
 			},
 			Creator: &calendar.EventCreator{
 				Email:       adminEmail,
 				DisplayName: adminName,
 			},
 			Attendees: []*calendar.EventAttendee{
-				{Email: resultRent.User.Email, DisplayName: resultRent.User.Name},
+				{Email: resultOrder.User.Email, DisplayName: resultOrder.User.Name},
 			},
 		}
 
@@ -284,30 +284,30 @@ func (srv *RentService) Accept(ctx *gin.Context, referenceId string) error {
 	})
 
 	if err != nil {
-		logger.WithError(err).Error("failed to create rent")
+		logger.WithError(err).Error("failed to create order")
 		return err
 	}
 
 	return nil
 }
 
-func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
+func (srv *OrderService) Reject(ctx *gin.Context, referenceId string) error {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "reject",
-		"scope":        "rent service",
+		"scope":        "order service",
 		"reference_id": referenceId,
 	})
 	logger.Info()
 
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get rent data")
+			logger.WithError(err).Error("failed to get order data")
 			return err
 		}
 
-		if resultRent.PaymentStatus != constant.PaymentSettlement {
+		if resultOrder.PaymentStatus != constant.PaymentSettlement {
 			logger.Error("cannot reject, payment status is not settlement")
 			return errors.New("cannot reject, payment status is not settlement")
 		}
@@ -315,20 +315,20 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 		srv.mu.Lock()
 		defer srv.mu.Unlock()
 
-		res, err := srv.Midtrans.Refund(resultRent)
+		res, err := srv.Midtrans.Refund(resultOrder)
 		if err != nil {
 			logger.WithError(err).Error("failed to do refund")
 			return err
 		}
 
-		resultRent.Status = "rejected"
-		_, err = srv.RentRepository.Update(tx, resultRent)
+		resultOrder.Status = "rejected"
+		_, err = srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update rent")
+			logger.WithError(err).Error("failed to update order")
 			return err
 		}
 
-		err = srv.Gomail.SendRefundedPayment(res, resultRent)
+		err = srv.Gomail.SendRefundedPayment(res, resultOrder)
 		if err != nil {
 			logger.WithError(err).Error("failed to send payment refunded email")
 			return err
@@ -339,54 +339,54 @@ func (srv *RentService) Reject(ctx *gin.Context, referenceId string) error {
 	})
 
 	if err != nil {
-		logger.WithError(err).Error("failed to reject rent")
+		logger.WithError(err).Error("failed to reject order")
 		return err
 	}
 
 	return nil
 }
 
-func (srv *RentService) GetDetail(referenceId string) (*mr.RentResponse, error) {
+func (srv *OrderService) GetDetail(referenceId string) (*mo.OrderResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "get_detail",
-		"scope":        "rent service",
+		"scope":        "order service",
 		"reference_id": referenceId,
 	})
 	logger.Info()
 
-	result := new(mr.RentResponse)
+	result := new(mo.OrderResponse)
 
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
 
-		resultRent, err := srv.RentRepository.GetDetail(tx, referenceId)
+		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
 			logger.WithError(err).Error("failed to get rent data")
 			return err
 		}
-		result = modelToResponse(resultRent)
+		result = modelToResponse(resultOrder)
 
 		logger.Info("end of db transaction")
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to get detail rent data")
+		logger.WithError(err).Error("failed to get detail order data")
 		return nil, err
 	}
 
 	return result, nil
 }
 
-func (srv *RentService) GetList(page pagination.Pagination) (pagination.Pagination, error) {
+func (srv *OrderService) GetList(page pagination.Pagination) (pagination.Pagination, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "get_list",
-		"scope": "rent service",
+		"scope": "order service",
 	})
 	var result pagination.Pagination
 	logger.Info("data page", page)
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
-		resultRepo, err := srv.RentRepository.GetList(tx, page)
+		resultRepo, err := srv.OrderRepository.GetList(tx, page)
 		if err != nil {
 			logger.WithError(err).Error("failed to get list")
 			return err

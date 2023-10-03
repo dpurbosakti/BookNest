@@ -1,8 +1,8 @@
-package rent
+package order
 
 import (
 	"book-nest/clients/midtrans"
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 	hh "book-nest/utils/handlerhelper"
 	jh "book-nest/utils/jwthelper"
 	"book-nest/utils/pagination"
@@ -15,24 +15,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type RentHandler struct {
-	RentService i.RentService
+type OrderHandler struct {
+	OrderService i.OrderService
 }
 
-func NewRentHandler(rentService i.RentService) i.RentHandler {
-	return &RentHandler{RentService: rentService}
+func NewOrderHandler(orderService i.OrderService) i.OrderHandler {
+	return &OrderHandler{OrderService: orderService}
 }
 
-func (hdl *RentHandler) Create(c *gin.Context) {
-	rentReq := new(mr.RentCreateRequest)
-	errBind := c.ShouldBindJSON(&rentReq)
+func (hdl *OrderHandler) Create(c *gin.Context) {
+	orderReq := new(mo.OrderCreateRequest)
+	errBind := c.ShouldBindJSON(&orderReq)
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
-		"scope": "rent handler",
-		"data":  rentReq,
+		"scope": "order handler",
+		"data":  orderReq,
 	})
 	if errBind != nil {
-		logger.WithError(errBind).Error("failed to bind rent")
+		logger.WithError(errBind).Error("failed to bind order")
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errBind.Error()})
 		return
 	}
@@ -45,10 +45,10 @@ func (hdl *RentHandler) Create(c *gin.Context) {
 	}
 	logger.WithField("user_id", userData.Id).Info()
 
-	result, errCreate := hdl.RentService.Create(rentReq, userData.Id)
+	result, errCreate := hdl.OrderService.Create(orderReq, userData.Id)
 
 	if errCreate != nil {
-		logger.WithError(errCreate).Error("failed to create rent data")
+		logger.WithError(errCreate).Error("failed to create order data")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errCreate.Error()})
 		return
 	}
@@ -59,12 +59,12 @@ func (hdl *RentHandler) Create(c *gin.Context) {
 	})
 }
 
-func (hdl *RentHandler) MidtransCallback(c *gin.Context) {
+func (hdl *OrderHandler) MidtransCallback(c *gin.Context) {
 	midtransReq := new(midtrans.MidtransRequest)
 	errBind := c.ShouldBindJSON(&midtransReq)
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "midtrans_callback",
-		"scope": "rent handler",
+		"scope": "order handler",
 		"data":  midtransReq,
 	})
 	if errBind != nil {
@@ -72,12 +72,12 @@ func (hdl *RentHandler) MidtransCallback(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": errBind.Error()})
 		return
 	}
-	updateReq := new(mr.RentUpdateRequest)
+	updateReq := new(mo.OrderUpdateRequest)
 	updateReq.Copier(midtransReq.TransactionStatus, midtransReq.OrderId, midtransReq.TransactionTime, midtransReq.PaymentType)
-	result, errUpdate := hdl.RentService.Update(updateReq)
+	result, errUpdate := hdl.OrderService.Update(updateReq)
 
 	if errUpdate != nil {
-		logger.WithError(errUpdate).Error("failed to update rent data")
+		logger.WithError(errUpdate).Error("failed to update order data")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errUpdate.Error()})
 		return
 	}
@@ -88,12 +88,12 @@ func (hdl *RentHandler) MidtransCallback(c *gin.Context) {
 	})
 }
 
-func (hdl *RentHandler) Accept(c *gin.Context) {
+func (hdl *OrderHandler) Accept(c *gin.Context) {
 	id := c.Param("reference_id")
 
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "accept",
-		"scope":        "rent handler",
+		"scope":        "order handler",
 		"reference_id": id,
 	})
 
@@ -102,10 +102,10 @@ func (hdl *RentHandler) Accept(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
 		return
 	}
-	errAccept := hdl.RentService.Accept(c, id)
+	errAccept := hdl.OrderService.Accept(c, id)
 
 	if errAccept != nil {
-		logger.WithError(errAccept).Error("failed to accept rent")
+		logger.WithError(errAccept).Error("failed to accept order")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errAccept.Error()})
 		return
 	}
@@ -116,12 +116,12 @@ func (hdl *RentHandler) Accept(c *gin.Context) {
 
 }
 
-func (hdl *RentHandler) Reject(c *gin.Context) {
+func (hdl *OrderHandler) Reject(c *gin.Context) {
 	id := c.Param("reference_id")
 
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "reject",
-		"scope":        "rent handler",
+		"scope":        "order handler",
 		"reference_id": id,
 	})
 
@@ -130,10 +130,10 @@ func (hdl *RentHandler) Reject(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "no reference id provided"})
 		return
 	}
-	errReject := hdl.RentService.Reject(c, id)
+	errReject := hdl.OrderService.Reject(c, id)
 
 	if errReject != nil {
-		logger.WithError(errReject).Error("failed to reject rent")
+		logger.WithError(errReject).Error("failed to reject order")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errReject.Error()})
 		return
 	}
@@ -144,12 +144,12 @@ func (hdl *RentHandler) Reject(c *gin.Context) {
 
 }
 
-func (hdl *RentHandler) GetDetail(c *gin.Context) {
+func (hdl *OrderHandler) GetDetail(c *gin.Context) {
 	id := c.Param("reference_id")
 
 	logger := logrus.WithFields(logrus.Fields{
 		"func":         "reject",
-		"scope":        "rent handler",
+		"scope":        "order handler",
 		"reference_id": id,
 	})
 
@@ -159,10 +159,10 @@ func (hdl *RentHandler) GetDetail(c *gin.Context) {
 		return
 	}
 
-	data, errGet := hdl.RentService.GetDetail(id)
+	data, errGet := hdl.OrderService.GetDetail(id)
 
 	if errGet != nil {
-		logger.WithError(errGet).Error("failed to reject rent")
+		logger.WithError(errGet).Error("failed to get data order")
 		c.JSON(http.StatusInternalServerError, gin.H{"message": errGet.Error()})
 		return
 	}
@@ -173,7 +173,7 @@ func (hdl *RentHandler) GetDetail(c *gin.Context) {
 	})
 }
 
-func (hdl *RentHandler) GetList(c *gin.Context) {
+func (hdl *OrderHandler) GetList(c *gin.Context) {
 	var page pagination.Pagination
 	limitInt, _ := strconv.Atoi(c.Query("limit"))
 	pageInt, _ := strconv.Atoi(c.Query("page"))
@@ -185,11 +185,11 @@ func (hdl *RentHandler) GetList(c *gin.Context) {
 	page.Column = &column
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "get_list",
-		"scope": "rent handler",
+		"scope": "order handler",
 		"data":  page,
 	})
 
-	result, err := hdl.RentService.GetList(page)
+	result, err := hdl.OrderService.GetList(page)
 	if err != nil {
 		logger.WithError(err).Error("failed to get list")
 		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
@@ -203,7 +203,7 @@ func (hdl *RentHandler) GetList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, hh.ResponseData{
-		Message: "get data rents success",
+		Message: "get data orders success",
 		Data:    result,
 	})
 }

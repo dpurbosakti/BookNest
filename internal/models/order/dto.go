@@ -1,4 +1,4 @@
-package rent
+package order
 
 import (
 	mb "book-nest/internal/models/book"
@@ -9,13 +9,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type RentCreateRequest struct {
+type OrderCreateRequest struct {
 	BookId        uint      `json:"book_id" binding:"required"`
 	BorrowingDate time.Time `json:"borrowing_date" binding:"required"`
 	ReturnedDate  time.Time `json:"returned_date" binding:"required"`
 }
 
-type RentResponse struct {
+type OrderResponse struct {
 	Id            uint           `json:"id"`
 	ReferenceId   string         `json:"reference_id"`
 	UserId        uuid.UUID      `json:"user_id"`
@@ -25,6 +25,7 @@ type RentResponse struct {
 	BorrowingDate time.Time      `json:"borrowing_date"`
 	ReturnedDate  time.Time      `json:"returned_date"`
 	Fee           float64        `json:"fee"`
+	PaymentMethod string         `json:"payment_method"`
 	PaymentStatus string         `json:"payment_status"`
 	Status        string         `json:"status"`
 	Token         *string        `json:"token,omitempty"`
@@ -34,33 +35,34 @@ type RentResponse struct {
 	DeletedAt     gorm.DeletedAt `json:"deleted_at"`
 }
 
-type RentUpdateRequest struct {
+type OrderUpdateRequest struct {
 	ReferenceId     string
+	PaymentMethod   string
 	PaymentStatus   string
 	TransactionTime string
 	PaymentType     string
 	GrossAmount     string
 }
 
-func (rr *RentResponse) GetDaysBetween() int {
-	duration := rr.ReturnedDate.Sub(rr.BorrowingDate)
+func (or *OrderResponse) GetDaysBetween() int {
+	duration := or.ReturnedDate.Sub(or.BorrowingDate)
 	return int(duration.Hours() / 24)
 }
 
-func (rur *RentUpdateRequest) Copier(paymentStatus, referenceId, transactionTime, paymentType string) {
+func (our *OrderUpdateRequest) Copier(paymentStatus, referenceId, transactionTime, paymentType string) {
 	if paymentStatus != "" {
-		rur.PaymentStatus = paymentStatus
+		our.PaymentStatus = paymentStatus
 	}
 
 	if referenceId != "" {
-		rur.ReferenceId = referenceId
+		our.ReferenceId = referenceId
 	}
 
 	if transactionTime != "" {
-		rur.TransactionTime = transactionTime
+		our.TransactionTime = transactionTime
 	}
 
 	if paymentType != "" {
-		rur.PaymentType = paymentType
+		our.PaymentType = paymentType
 	}
 }

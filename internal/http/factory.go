@@ -22,10 +22,10 @@ import (
 	bookRepo "book-nest/internal/repositories/book"
 	bookSrv "book-nest/internal/services/book"
 
-	// rents
-	rentHdl "book-nest/internal/handlers/rent"
-	rentRepo "book-nest/internal/repositories/rent"
-	rentSrv "book-nest/internal/services/rent"
+	// orders
+	orderHdl "book-nest/internal/handlers/order"
+	orderRepo "book-nest/internal/repositories/order"
+	orderSrv "book-nest/internal/services/order"
 
 	// address
 	addressHdl "book-nest/internal/handlers/address"
@@ -42,7 +42,7 @@ type Presenter struct {
 	Auth    *authHdl.AuthHandler
 	User    *userHdl.UserHandler
 	Book    *bookHdl.BookHandler
-	Rent    *rentHdl.RentHandler
+	Order   *orderHdl.OrderHandler
 	Address *addressHdl.AddressHandler
 	Courier *courierHdl.CourierHandler
 }
@@ -68,10 +68,10 @@ func NewPresenter(db *gorm.DB) *Presenter {
 	bs := bookSrv.NewBookService(br, db)
 	bh := bookHdl.NewBookHandler(bs)
 
-	// rents
-	rr := rentRepo.NewRentRepository()
-	rs := rentSrv.NewRentService(rr, br, ur, db, gomail, midtrans)
-	rh := rentHdl.NewRentHandler(rs)
+	// orders
+	or := orderRepo.NewOrderRepository()
+	os := orderSrv.NewOrderService(or, br, ur, db, gomail, midtrans)
+	oh := orderHdl.NewOrderHandler(os)
 
 	// address
 	adr := addressRepo.NewAddressRepository()
@@ -80,14 +80,14 @@ func NewPresenter(db *gorm.DB) *Presenter {
 
 	// couriers
 	cr := courierRepo.NewCourierRepository()
-	cs := courierSrv.NewCourierService(cr, adr, rr, br, db, biteship)
+	cs := courierSrv.NewCourierService(cr, adr, or, br, db, biteship)
 	ch := courierHdl.NewCourierHandler(cs)
 
 	return &Presenter{
 		Auth:    ah.(*authHdl.AuthHandler),
 		User:    uh.(*userHdl.UserHandler),
 		Book:    bh.(*bookHdl.BookHandler),
-		Rent:    rh.(*rentHdl.RentHandler),
+		Order:   oh.(*orderHdl.OrderHandler),
 		Address: adh.(*addressHdl.AddressHandler),
 		Courier: ch.(*courierHdl.CourierHandler),
 	}

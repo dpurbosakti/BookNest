@@ -1,8 +1,8 @@
 package midtrans
 
-import mr "book-nest/internal/models/rent"
+import mo "book-nest/internal/models/order"
 
-func payloadRefundBuilder(input *mr.Rent) *MidtransRefundRequest {
+func payloadRefundBuilder(input *mo.Order) *MidtransRefundRequest {
 	return &MidtransRefundRequest{
 		RefundKey: input.ReferenceId,
 		Reason:    "Item out of stock",

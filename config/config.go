@@ -42,7 +42,7 @@ var Cfg *Config
 
 func GetConfig() {
 	if Cfg == nil {
-		viper.SetConfigFile("config.yml")
+		viper.SetConfigFile("config.yaml")
 		// default values
 		viper.SetDefault("FullName", "mokotest")
 		viper.SetDefault("Version", "0.0.1")

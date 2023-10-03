@@ -1,0 +1,55 @@
+name: BookNest
+version: 0.0.1
+
+httpConf:
+  host: localhost
+  port: 8080
+
+dbConf:
+  host: localhost
+  port: 5432
+  user: root
+  password: root
+  databasename: postgres
+  maxOpenConns: 5
+  maxIdleConns: 5
+  maxIdleTime: 100
+  dialect: postgres
+
+emailConf:
+  email: example@gmail.com
+  password: example
+  host: example.gmail.com
+  port: 888
+
+googleConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  state: 
+  tokenAccessUrl: https://www.googleapis.com/oauth2/v2/userinfo?access_token=
+
+twitterConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  apiEndpoint: 
+
+githubConf:
+  clientID: 
+  clientSecret: 
+  redirectUrl: 
+  tokenAccessUrl: https://api.github.com/user
+
+midtransConf:
+  merchantID:
+  clientKey:
+  serverKey:
+
+biteshipConf:
+  baseUrl:
+  serverKey: 
+
+xenditConf:
+  serverKey: 
+  callbackToken:

@@ -3,7 +3,7 @@ package gomail
 import (
 	"book-nest/clients/midtrans"
 	"book-nest/config"
-	mr "book-nest/internal/models/rent"
+	mo "book-nest/internal/models/order"
 	mu "book-nest/internal/models/user"
 	"fmt"
 
@@ -32,11 +32,11 @@ func parseVerificationTemplate(verificationCode string) string {
 	return fmt.Sprintf(verificationCodeHTML, verificationCode)
 }
 
-func parseInvoiceTemplate(input *mr.RentResponse) string {
+func parseInvoiceTemplate(input *mo.OrderResponse) string {
 	return fmt.Sprintf(invoiceRentHTML, input.Book.Title, input.GetDaysBetween(), input.Fee, *input.Token, *input.RedirectURL)
 }
 
-func parsePaymentSuccessTemplate(input *mr.RentUpdateRequest) string {
+func parsePaymentSuccessTemplate(input *mo.OrderUpdateRequest) string {
 	return fmt.Sprintf(paymentSuccessHTML, input.ReferenceId, input.PaymentType, input.TransactionTime)
 }
 
@@ -63,7 +63,7 @@ func (g *Gomail) SendEmailVerificationCode(user *mu.User) error {
 	return nil
 }
 
-func (g *Gomail) SendInvoice(input *mr.RentResponse) error {
+func (g *Gomail) SendInvoice(input *mo.OrderResponse) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", g.Email)
 	message.SetHeader("To", input.User.Email)
@@ -82,39 +82,39 @@ func (g *Gomail) SendInvoice(input *mr.RentResponse) error {
 	return nil
 }
 
-func (g *Gomail) SendSuccessPayment(input *mr.RentUpdateRequest, rent *mr.Rent) error {
+func (g *Gomail) SendSuccessPayment(input *mo.OrderUpdateRequest, order *mo.Order) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", g.Email)
-	message.SetHeader("To", rent.User.Email)
+	message.SetHeader("To", order.User.Email)
 	message.SetHeader("Subject", "Payment Status")
 	message.SetBody("text/html", parsePaymentSuccessTemplate(input))
 	logger := logrus.WithFields(logrus.Fields{
 		"func": "send_success_payment",
-		"to":   rent.User.Email,
+		"to":   order.User.Email,
 	})
 
 	if err := g.Dialer.DialAndSend(message); err != nil {
 		logger.Error(err)
-		return fmt.Errorf("failed when sending email to %s, err: %w", rent.User.Email, err)
+		return fmt.Errorf("failed when sending email to %s, err: %w", order.User.Email, err)
 	}
 	logger.Info("email sent...")
 	return nil
 }
 
-func (g *Gomail) SendRefundedPayment(input *midtrans.MidtransRefundResponse, rent *mr.Rent) error {
+func (g *Gomail) SendRefundedPayment(input *midtrans.MidtransRefundResponse, order *mo.Order) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", g.Email)
-	message.SetHeader("To", rent.User.Email)
+	message.SetHeader("To", order.User.Email)
 	message.SetHeader("Subject", "Payment Status")
 	message.SetBody("text/html", parsePaymentRefundedTemplate(input))
 	logger := logrus.WithFields(logrus.Fields{
 		"func": "send_refunded_payment",
-		"to":   rent.User.Email,
+		"to":   order.User.Email,
 	})
 
 	if err := g.Dialer.DialAndSend(message); err != nil {
 		logger.Error(err)
-		return fmt.Errorf("failed when sending email to %s, err: %w", rent.User.Email, err)
+		return fmt.Errorf("failed when sending email to %s, err: %w", order.User.Email, err)
 	}
 	logger.Info("email sent...")
 	return nil

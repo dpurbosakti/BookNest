@@ -15,16 +15,16 @@ type CourierService struct {
 	CourierRepository i.CourierRepository
 	AddressRepository i.AddressRepository
 	BookRepository    i.BookRepository
-	RentRepository    i.RentRepository
+	OrderRepository   i.OrderRepository
 	DB                *gorm.DB
 	Biteship          *biteship.Biteship
 }
 
-func NewCourierService(courierRepository i.CourierRepository, addressRepository i.AddressRepository, rentRepository i.RentRepository, bookRepository i.BookRepository, db *gorm.DB, biteship *biteship.Biteship) i.CourierService {
+func NewCourierService(courierRepository i.CourierRepository, addressRepository i.AddressRepository, orderRepository i.OrderRepository, bookRepository i.BookRepository, db *gorm.DB, biteship *biteship.Biteship) i.CourierService {
 	return &CourierService{
 		CourierRepository: courierRepository,
 		AddressRepository: addressRepository,
-		RentRepository:    rentRepository,
+		OrderRepository:   orderRepository,
 		BookRepository:    bookRepository,
 		DB:                db,
 		Biteship:          biteship,

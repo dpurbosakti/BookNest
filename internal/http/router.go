@@ -44,15 +44,15 @@ func InitRouter(r *gin.Engine, db *gorm.DB) {
 	bookGroup.PUT("/:id", middlewares.AdminAuthorization(), p.Book.Update)
 	bookGroup.DELETE("/:id", middlewares.AdminAuthorization(), p.Book.Delete)
 
-	// rents
-	rentGroup := r.Group("/rents")
-	rentGroup.POST("/midtrans/callback", p.Rent.MidtransCallback)
+	// orders
+	rentGroup := r.Group("/orders")
+	rentGroup.POST("/midtrans/callback", p.Order.MidtransCallback)
 	rentGroup.Use(middlewares.Authentication())
-	rentGroup.POST("", p.Rent.Create)
-	rentGroup.POST("/:reference_id/accept", middlewares.AdminAuthorization(), p.Rent.Accept)
-	rentGroup.POST("/:reference_id/reject", middlewares.AdminAuthorization(), p.Rent.Reject)
-	rentGroup.GET("/:reference_id", p.Rent.GetDetail)
-	rentGroup.GET("", middlewares.AdminAuthorization(), p.Rent.GetList)
+	rentGroup.POST("", p.Order.Create)
+	rentGroup.POST("/:reference_id/accept", middlewares.AdminAuthorization(), p.Order.Accept)
+	rentGroup.POST("/:reference_id/reject", middlewares.AdminAuthorization(), p.Order.Reject)
+	rentGroup.GET("/:reference_id", p.Order.GetDetail)
+	rentGroup.GET("", middlewares.AdminAuthorization(), p.Order.GetList)
 
 	// addresss
 	addressGroup := r.Group("/address")

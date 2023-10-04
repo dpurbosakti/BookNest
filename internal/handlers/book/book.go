@@ -169,3 +169,28 @@ func (hdl *BookHandler) Update(c *gin.Context) {
 		Data:    result,
 	})
 }
+
+func (hdl *BookHandler) Return(c *gin.Context) {
+	id := c.Param("id")
+
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "return",
+		"scope": "book handler",
+		"id":    id,
+	})
+	cnvId, err := strconv.Atoi(id)
+	if err != nil {
+		logger.WithError(err).Error("failed to convert id")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	err = hdl.BookService.Delete(uint(cnvId))
+	if err != nil {
+		logger.WithError(err).Error("failed to delete data")
+		c.JSON(http.StatusNotFound, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "success return book, now book is available"})
+}

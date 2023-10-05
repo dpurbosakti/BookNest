@@ -8,4 +8,7 @@ var (
 	// payment status
 	PaymentSettlement = "settlement"
 	PaymentRefund     = "refund"
+
+	// order status
+	StatusCompleted = "completed"
 )

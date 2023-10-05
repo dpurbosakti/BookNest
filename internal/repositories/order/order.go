@@ -58,3 +58,17 @@ func (repo *OrderRepository) GetList(tx *gorm.DB, page pagination.Pagination) (p
 
 	return page, nil
 }
+
+func (repo *OrderRepository) GetByBook(tx *gorm.DB, bookId uint) (*mo.Order, error) {
+	order := new(mo.Order)
+	result := tx.Preload("User").Preload("Book").Where("book_id = ? AND status <> ?", bookId, "completed").First(&order)
+	if result.Error != nil {
+		return nil, fmt.Errorf("book id %d not found", bookId)
+	}
+
+	if result.RowsAffected < 1 {
+		return nil, nil
+	}
+
+	return order, nil
+}

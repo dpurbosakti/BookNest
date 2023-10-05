@@ -30,4 +30,5 @@ type OrderRepository interface {
 	GetDetail(tx *gorm.DB, referenceId string) (*mo.Order, error)
 	Update(tx *gorm.DB, input *mo.Order) (*mo.Order, error)
 	GetList(tx *gorm.DB, page pagination.Pagination) (pagination.Pagination, error)
+	GetByBook(tx *gorm.DB, bookId uint) (*mo.Order, error)
 }

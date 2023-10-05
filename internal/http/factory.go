@@ -7,6 +7,8 @@ import (
 
 	"gorm.io/gorm"
 
+	i "book-nest/internal/interfaces"
+
 	// auth
 	authHdl "book-nest/internal/handlers/auth"
 	authRepo "book-nest/internal/repositories/auth"
@@ -48,47 +50,79 @@ type Presenter struct {
 }
 
 func NewPresenter(db *gorm.DB) *Presenter {
+	// initiate variable
+	var (
+		// users
+		userRepository i.UserRepository
+		userService    i.UserService
+		userHandler    i.UserHandler
+
+		// auth
+		authRepository i.AuthRepository
+		authService    i.AuthService
+		authHandler    i.AuthHandler
+
+		// books
+		bookRepository i.BookRepository
+		bookService    i.BookService
+		bookHandler    i.BookHandler
+
+		// orders
+		orderRepository i.OrderRepository
+		orderService    i.OrderService
+		orderHandler    i.OrderHandler
+
+		// address
+		addressRepository i.AddressRepository
+		addressService    i.AddressService
+		addressHandler    i.AddressHandler
+
+		// couriers
+		courierRepository i.CourierRepository
+		courierService    i.CourierService
+		courierHandler    i.CourierHandler
+	)
 	// clients
 	gomail := gomail.NewGomailClient()
 	midtrans := midtrans.NewMidtransClient()
 	biteship := biteship.NewBiteshipClient()
 
 	// users
-	ur := userRepo.NewUserRepository()
-	us := userSrv.NewUserService(ur, db, gomail)
-	uh := userHdl.NewUserHandler(us)
+	userRepository = userRepo.NewUserRepository()
+	userService = userSrv.NewUserService(userRepository, db, gomail)
+	userHandler = userHdl.NewUserHandler(userService)
 
 	// auth
-	ar := authRepo.NewAuthRepository()
-	as := authSrv.NewAuthService(ar, ur, db)
-	ah := authHdl.NewAuthHandler(as)
+	authRepository = authRepo.NewAuthRepository()
+	authService = authSrv.NewAuthService(authRepository, userRepository, db)
+	authHandler = authHdl.NewAuthHandler(authService)
 
 	// books
-	br := bookRepo.NewBookRepository()
-	bs := bookSrv.NewBookService(br, db)
-	bh := bookHdl.NewBookHandler(bs)
+	bookRepository = bookRepo.NewBookRepository()
+	bookService = bookSrv.NewBookService(bookRepository, orderRepository, db)
+	bookHandler = bookHdl.NewBookHandler(bookService)
 
 	// orders
-	or := orderRepo.NewOrderRepository()
-	os := orderSrv.NewOrderService(or, br, ur, db, gomail, midtrans)
-	oh := orderHdl.NewOrderHandler(os)
+	orderRepository = orderRepo.NewOrderRepository()
+	orderService = orderSrv.NewOrderService(orderRepository, bookRepository, userRepository, db, gomail, midtrans)
+	orderHandler = orderHdl.NewOrderHandler(orderService)
 
 	// address
-	adr := addressRepo.NewAddressRepository()
-	ads := addressSrv.NewAddressService(adr, db)
-	adh := addressHdl.NewAddressHandler(ads)
+	addressRepository = addressRepo.NewAddressRepository()
+	addressService = addressSrv.NewAddressService(addressRepository, db)
+	addressHandler = addressHdl.NewAddressHandler(addressService)
 
 	// couriers
-	cr := courierRepo.NewCourierRepository()
-	cs := courierSrv.NewCourierService(cr, adr, or, br, db, biteship)
-	ch := courierHdl.NewCourierHandler(cs)
+	courierRepository = courierRepo.NewCourierRepository()
+	courierService = courierSrv.NewCourierService(courierRepository, addressRepository, orderRepository, bookRepository, db, biteship)
+	courierHandler = courierHdl.NewCourierHandler(courierService)
 
 	return &Presenter{
-		Auth:    ah.(*authHdl.AuthHandler),
-		User:    uh.(*userHdl.UserHandler),
-		Book:    bh.(*bookHdl.BookHandler),
-		Order:   oh.(*orderHdl.OrderHandler),
-		Address: adh.(*addressHdl.AddressHandler),
-		Courier: ch.(*courierHdl.CourierHandler),
+		Auth:    authHandler.(*authHdl.AuthHandler),
+		User:    userHandler.(*userHdl.UserHandler),
+		Book:    bookHandler.(*bookHdl.BookHandler),
+		Order:   orderHandler.(*orderHdl.OrderHandler),
+		Address: addressHandler.(*addressHdl.AddressHandler),
+		Courier: courierHandler.(*courierHdl.CourierHandler),
 	}
 }

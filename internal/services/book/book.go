@@ -1,6 +1,7 @@
 package book
 
 import (
+	"book-nest/internal/constant"
 	i "book-nest/internal/interfaces"
 	mb "book-nest/internal/models/book"
 	"book-nest/utils/pagination"
@@ -11,14 +12,16 @@ import (
 )
 
 type BookService struct {
-	BookRepository i.BookRepository
-	DB             *gorm.DB
+	BookRepository  i.BookRepository
+	OrderRepository i.OrderRepository
+	DB              *gorm.DB
 }
 
-func NewBookService(bookRepository i.BookRepository, db *gorm.DB) i.BookService {
+func NewBookService(bookRepository i.BookRepository, orderRepository i.OrderRepository, db *gorm.DB) i.BookService {
 	return &BookService{
-		BookRepository: bookRepository,
-		DB:             db,
+		BookRepository:  bookRepository,
+		OrderRepository: orderRepository,
+		DB:              db,
 	}
 }
 
@@ -167,4 +170,52 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 	}
 
 	return result, nil
+}
+
+func (srv *BookService) Return(bookId uint) error {
+	logger := logrus.WithFields(logrus.Fields{
+		"func":  "update",
+		"scope": "book service",
+	})
+	logger.WithField("book_id", bookId).Info()
+	err := srv.DB.Transaction(func(tx *gorm.DB) error {
+		logger.Info("db transaction begin")
+		book, err := srv.BookRepository.GetDetail(tx, bookId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail book")
+			return err
+		}
+
+		book.AvailableAt = nil
+		book.IsAvailable = true
+
+		_, err = srv.BookRepository.Update(tx, book)
+		if err != nil {
+			logger.WithError(err).Error("failed to update data book")
+			return err
+		}
+
+		order, err := srv.OrderRepository.GetByBook(tx, bookId)
+		if err != nil {
+			logger.WithError(err).Error("failed to get detail order")
+			return err
+		}
+
+		order.Status = constant.StatusCompleted
+
+		_, err = srv.OrderRepository.Update(tx, order)
+		if err != nil {
+			logger.WithError(err).Error("failed to update data book")
+			return err
+		}
+
+		logger.Info("end of db transaction")
+		return nil
+	})
+	if err != nil {
+		logger.Error("failed to update data")
+		return err
+	}
+
+	return nil
 }

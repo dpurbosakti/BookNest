@@ -4,6 +4,7 @@ import (
 	"book-nest/internal/constant"
 	i "book-nest/internal/interfaces"
 	mb "book-nest/internal/models/book"
+	eh "book-nest/utils/errorhelper"
 	"book-nest/utils/pagination"
 	"errors"
 
@@ -182,7 +183,7 @@ func (srv *BookService) Return(bookId uint) error {
 		logger.Info("db transaction begin")
 		book, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail book")
+			eh.FailedGetDetail(logger, err, "book")
 			return err
 		}
 
@@ -197,7 +198,7 @@ func (srv *BookService) Return(bookId uint) error {
 
 		order, err := srv.OrderRepository.GetByBook(tx, bookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail order")
+			eh.FailedGetDetail(logger, err, "order")
 			return err
 		}
 

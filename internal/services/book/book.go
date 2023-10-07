@@ -192,7 +192,7 @@ func (srv *BookService) Return(bookId uint) error {
 
 		_, err = srv.BookRepository.Update(tx, book)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data book")
+			eh.FailedUpdate(logger, err, "book")
 			return err
 		}
 
@@ -206,7 +206,7 @@ func (srv *BookService) Return(bookId uint) error {
 
 		_, err = srv.OrderRepository.Update(tx, order)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data book")
+			eh.FailedUpdate(logger, err, "order")
 			return err
 		}
 
@@ -214,7 +214,7 @@ func (srv *BookService) Return(bookId uint) error {
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to update data")
+		eh.FailedUpdate(logger, err, "book")
 		return err
 	}
 

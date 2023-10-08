@@ -73,8 +73,8 @@ func (srv *BookService) GetDetail(bookId uint) (*mb.BookResponse, error) {
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.BookRepository.GetDetail(tx, bookId)
-		logger.WithError(err).Error("failed to get detail")
 		if err != nil {
+			eh.FailedGetDetail(logger, err, "book")
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -82,7 +82,7 @@ func (srv *BookService) GetDetail(bookId uint) (*mb.BookResponse, error) {
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get detail")
+		eh.FailedGetDetail(logger, err, "book")
 		return result, err
 	}
 
@@ -152,13 +152,13 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 		logger.Info("db transaction begin")
 		resultGet, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail")
+			eh.FailedGetDetail(logger, err, "book")
 			return err
 		}
 		resultGet.Copier(input)
 		resultUpdate, err := srv.BookRepository.Update(tx, resultGet)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data")
+			eh.FailedUpdate(logger, err, "book")
 			return err
 		}
 		result = modelToResponse(resultUpdate)
@@ -166,7 +166,7 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to update data")
+		eh.FailedUpdate(logger, err, "book")
 		return result, err
 	}
 

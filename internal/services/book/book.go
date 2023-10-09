@@ -125,14 +125,14 @@ func (srv *BookService) Delete(bookId uint) error {
 		logger.Info("db transaction begin")
 		err := srv.BookRepository.Delete(tx, bookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to delete data")
+			eh.FailedDelete(logger, err, "book")
 			return err
 		}
 		logger.Info("end of db transaction")
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to delete data")
+		eh.FailedDelete(logger, err, "book")
 		return err
 	}
 

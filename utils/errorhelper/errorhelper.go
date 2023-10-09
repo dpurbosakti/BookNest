@@ -15,3 +15,8 @@ func FailedGetDetail(logger *logrus.Entry, err error, data string) {
 func FailedUpdate(logger *logrus.Entry, err error, data string) {
 	logger.WithError(err).Error(fmt.Sprintf("failed to update %s", data))
 }
+
+// add logger with error level and what it caused to failed to update
+func FailedDelete(logger *logrus.Entry, err error, data string) {
+	logger.WithError(err).Error(fmt.Sprintf("failed to delete %s", data))
+}

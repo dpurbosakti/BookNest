@@ -100,7 +100,7 @@ func (srv *BookService) GetList(page pagination.Pagination) (pagination.Paginati
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.BookRepository.GetList(tx, page)
 		if err != nil {
-			logger.WithError(err).Error("failed to get list")
+			eh.FailedGetList(logger, err, "book")
 			return err
 		}
 		result = resultRepo
@@ -108,7 +108,7 @@ func (srv *BookService) GetList(page pagination.Pagination) (pagination.Paginati
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get list")
+		eh.FailedGetList(logger, err, "book")
 		return result, err
 	}
 

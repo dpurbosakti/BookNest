@@ -48,7 +48,7 @@ func (srv *BookService) Create(input *mb.BookCreateRequest) (*mb.BookResponse, e
 		}
 		resultRepo, err := srv.BookRepository.Create(tx, data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create book")
+			eh.FailedCreate(logger, err, "book")
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -56,7 +56,7 @@ func (srv *BookService) Create(input *mb.BookCreateRequest) (*mb.BookResponse, e
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create book")
+		eh.FailedCreate(logger, err, "book")
 		return nil, err
 	}
 

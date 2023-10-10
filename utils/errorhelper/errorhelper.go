@@ -21,7 +21,12 @@ func FailedDelete(logger *logrus.Entry, err error, data string) {
 	logger.WithError(err).Error(fmt.Sprintf("failed to delete %s", data))
 }
 
-// add logger with error level and what it caused to failed to delete
+// add logger with error level and what it caused to failed to get list
 func FailedGetList(logger *logrus.Entry, err error, data string) {
 	logger.WithError(err).Error(fmt.Sprintf("failed to get list %s", data))
+}
+
+// add logger with error level and what it caused to failed to create
+func FailedCreate(logger *logrus.Entry, err error, data string) {
+	logger.WithError(err).Error(fmt.Sprintf("failed to create %s", data))
 }

@@ -1,6 +1,6 @@
 package constant
 
-var (
+const (
 	// address
 	AdminLatitude  = -7.59415
 	AdminLongitude = 112.7869134

@@ -4,6 +4,7 @@ import (
 	"book-nest/clients/gomail"
 	i "book-nest/internal/interfaces"
 	mu "book-nest/internal/models/user"
+	eh "book-nest/utils/errorhelper"
 	"book-nest/utils/pagination"
 	ph "book-nest/utils/passwordhelper"
 	"errors"
@@ -58,18 +59,19 @@ func (srv *UserService) Create(input *mu.UserCreateRequest) (*mu.UserResponse, e
 		}
 		resultRepo, err := srv.UserRepository.Create(tx, data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create user")
+			eh.FailedCreate(logger, err, "user")
 			return err
 		}
 		result = modelToResponse(resultRepo)
 		if err := srv.Gomail.SendEmailVerificationCode(data); err != nil {
+			logger.WithError(err).Error("failed to send email")
 			return errors.New("failed to send email: " + err.Error())
 		}
 		logger.WithField("data", data).Info("end of db transaction")
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create user")
+		eh.FailedCreate(logger, err, "user")
 		return nil, err
 	}
 
@@ -86,7 +88,7 @@ func (srv *UserService) Verify(input *mu.UserVerifyRequest) error {
 		logger.Info("db transaction begin")
 		result, err := srv.UserRepository.GetByEmail(tx, input.Email)
 		if err != nil {
-			logger.WithError(err).Error("failed to check email")
+			eh.FailedGetDetail(logger, err, "user")
 			return err
 		}
 		if result.IsVerified {
@@ -101,7 +103,7 @@ func (srv *UserService) Verify(input *mu.UserVerifyRequest) error {
 		result.IsVerified = true
 		_, errSave := srv.UserRepository.Update(tx, result)
 		if errSave != nil {
-			logger.WithError(errSave).Error("failed to update data")
+			eh.FailedUpdate(logger, err, "user")
 			return errSave
 		}
 
@@ -126,7 +128,7 @@ func (srv *UserService) RefreshVerificationCode(input *mu.UserVerificationCodeRe
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.UserRepository.GetByEmail(tx, input.Email)
-		logger.WithError(err).Error("failed to check email")
+		eh.FailedGetDetail(logger, err, "user")
 		if err != nil {
 			return err
 		}
@@ -138,7 +140,7 @@ func (srv *UserService) RefreshVerificationCode(input *mu.UserVerificationCodeRe
 		resultRepo.VerificationCode = verCode
 		_, err = srv.UserRepository.Update(tx, resultRepo)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data")
+			eh.FailedUpdate(logger, err, "user")
 			return err
 		}
 		dataUser = resultRepo
@@ -168,7 +170,7 @@ func (srv *UserService) GetDetail(userId uuid.UUID) (*mu.UserResponse, error) {
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.UserRepository.GetDetail(tx, userId)
-		logger.WithError(err).Error("failed to get detail")
+		eh.FailedGetDetail(logger, err, "user")
 		if err != nil {
 			return err
 		}
@@ -177,7 +179,7 @@ func (srv *UserService) GetDetail(userId uuid.UUID) (*mu.UserResponse, error) {
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get detail")
+		eh.FailedGetDetail(logger, err, "user")
 		return result, err
 	}
 
@@ -195,7 +197,7 @@ func (srv *UserService) GetList(page pagination.Pagination) (pagination.Paginati
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.UserRepository.GetList(tx, page)
 		if err != nil {
-			logger.WithError(err).Error("failed to get list")
+			eh.FailedGetList(logger, err, "user")
 			return err
 		}
 		result = resultRepo
@@ -203,7 +205,7 @@ func (srv *UserService) GetList(page pagination.Pagination) (pagination.Paginati
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get list")
+		eh.FailedGetList(logger, err, "user")
 		return result, err
 	}
 
@@ -220,14 +222,14 @@ func (srv *UserService) Delete(userId uuid.UUID) error {
 		logger.Info("db transaction begin")
 		err := srv.UserRepository.Delete(tx, userId)
 		if err != nil {
-			logger.WithError(err).Error("failed to delete data")
+			eh.FailedDelete(logger, err, "user")
 			return err
 		}
 		logger.Info("end of db transaction")
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to delete data")
+		eh.FailedDelete(logger, err, "user")
 		return err
 	}
 
@@ -254,13 +256,13 @@ func (srv *UserService) Update(input *mu.UserUpdateRequest, userId uuid.UUID) (*
 		logger.Info("db transaction begin")
 		resultGet, err := srv.UserRepository.GetDetail(tx, userId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail")
+			eh.FailedGetDetail(logger, err, "user")
 			return err
 		}
 		resultGet.Copier(input)
 		resultUpdate, err := srv.UserRepository.Update(tx, resultGet)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data")
+			eh.FailedUpdate(logger, err, "user")
 			return err
 		}
 		result = modelToResponse(resultUpdate)
@@ -268,7 +270,7 @@ func (srv *UserService) Update(input *mu.UserUpdateRequest, userId uuid.UUID) (*
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to update data")
+		eh.FailedUpdate(logger, err, "user")
 		return result, err
 	}
 

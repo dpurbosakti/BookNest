@@ -4,6 +4,7 @@ import (
 	"book-nest/clients/biteship"
 	i "book-nest/internal/interfaces"
 	mc "book-nest/internal/models/courier"
+	eh "book-nest/utils/errorhelper"
 	"errors"
 
 	"github.com/google/uuid"
@@ -38,7 +39,7 @@ func (srv *CourierService) GetBiteshipCourier() error {
 	})
 	biteshipResp, err := srv.Biteship.GetListCourier()
 	if err != nil {
-		logger.WithError(err).Error("failed to get list courier")
+		eh.FailedGetList(logger, err, "courier")
 		return err
 	}
 
@@ -48,7 +49,7 @@ func (srv *CourierService) GetBiteshipCourier() error {
 		logger.WithField("data", biteshipResp.Couriers).Info("db transaction begin")
 		err := srv.CourierRepository.Create(tx, &instantCouriers)
 		if err != nil {
-			logger.WithError(err).Error("failed to create courier")
+			eh.FailedCreate(logger, err, "courier")
 			return err
 		}
 
@@ -56,7 +57,7 @@ func (srv *CourierService) GetBiteshipCourier() error {
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create and get list courier")
+		eh.FailedGetList(logger, err, "courier")
 		return err
 	}
 
@@ -74,7 +75,7 @@ func (srv *CourierService) GetList() ([]mc.Courier, error) {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.CourierRepository.GetList(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to get list")
+			eh.FailedGetList(logger, err, "courier")
 			return err
 		}
 		if resultRepo == nil {
@@ -85,7 +86,7 @@ func (srv *CourierService) GetList() ([]mc.Courier, error) {
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get list")
+		eh.FailedGetList(logger, err, "courier")
 		return nil, err
 	}
 
@@ -106,7 +107,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, input *mc.CheckRatesRequ
 		logger.Info("db transaction begin")
 		resultBook, err := srv.BookRepository.GetDetail(tx, input.BookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail book")
+			eh.FailedGetDetail(logger, err, "book")
 			return err
 		}
 		if resultBook == nil {
@@ -115,7 +116,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, input *mc.CheckRatesRequ
 
 		resultAddress, err := srv.AddressRepository.GetDetail(tx, input.AddressId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail address")
+			eh.FailedGetDetail(logger, err, "address")
 			return err
 		}
 
@@ -126,7 +127,7 @@ func (srv *CourierService) CheckRates(userId uuid.UUID, input *mc.CheckRatesRequ
 
 		resultCourier, err := srv.CourierRepository.GetList(tx)
 		if err != nil {
-			logger.WithError(err).Error("failed to get list courier")
+			eh.FailedGetList(logger, err, "courier")
 			return err
 		}
 		payload := checkRatesPayloadBuilder(resultBook, *resultAddress, getCouriersName(resultCourier))

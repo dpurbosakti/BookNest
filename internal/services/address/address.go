@@ -3,6 +3,7 @@ package address
 import (
 	i "book-nest/internal/interfaces"
 	mad "book-nest/internal/models/address"
+	eh "book-nest/utils/errorhelper"
 	"errors"
 
 	"github.com/google/uuid"
@@ -39,7 +40,7 @@ func (srv *AddressService) Create(input *mad.AddressCreateRequest) (*mad.Address
 		logger.WithField("data", data).Info("db transaction begin")
 		resultRepo, err := srv.AddressRepository.Create(tx, data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create address")
+			eh.FailedCreate(logger, err, "address")
 			return err
 		}
 
@@ -48,7 +49,7 @@ func (srv *AddressService) Create(input *mad.AddressCreateRequest) (*mad.Address
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create address")
+		eh.FailedCreate(logger, err, "address")
 		return nil, err
 	}
 

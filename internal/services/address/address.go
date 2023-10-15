@@ -66,8 +66,8 @@ func (srv *AddressService) GetDetail(addressId uint) (*mad.AddressResponse, erro
 	err := srv.DB.Transaction(func(tx *gorm.DB) error {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.AddressRepository.GetDetail(tx, addressId)
-		logger.WithError(err).Error("failed to get detail")
 		if err != nil {
+			eh.FailedGetDetail(logger, err, "address")
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -75,7 +75,7 @@ func (srv *AddressService) GetDetail(addressId uint) (*mad.AddressResponse, erro
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get detail")
+		eh.FailedGetDetail(logger, err, "address")
 		return result, err
 	}
 

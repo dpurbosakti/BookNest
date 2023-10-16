@@ -26,6 +26,8 @@ func NewBookService(bookRepository i.BookRepository, orderRepository i.OrderRepo
 	}
 }
 
+const scope = "book"
+
 func (srv *BookService) Create(input *mb.BookCreateRequest) (*mb.BookResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
@@ -48,7 +50,7 @@ func (srv *BookService) Create(input *mb.BookCreateRequest) (*mb.BookResponse, e
 		}
 		resultRepo, err := srv.BookRepository.Create(tx, data)
 		if err != nil {
-			eh.FailedCreate(logger, err, "book")
+			eh.FailedCreate(logger, err, scope)
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -56,7 +58,7 @@ func (srv *BookService) Create(input *mb.BookCreateRequest) (*mb.BookResponse, e
 		return nil
 	})
 	if err != nil {
-		eh.FailedCreate(logger, err, "book")
+		eh.FailedCreate(logger, err, scope)
 		return nil, err
 	}
 
@@ -74,7 +76,7 @@ func (srv *BookService) GetDetail(bookId uint) (*mb.BookResponse, error) {
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			eh.FailedGetDetail(logger, err, "book")
+			eh.FailedGetDetail(logger, err, scope)
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -82,7 +84,7 @@ func (srv *BookService) GetDetail(bookId uint) (*mb.BookResponse, error) {
 		return nil
 	})
 	if err != nil {
-		eh.FailedGetDetail(logger, err, "book")
+		eh.FailedGetDetail(logger, err, scope)
 		return result, err
 	}
 
@@ -100,7 +102,7 @@ func (srv *BookService) GetList(page pagination.Pagination) (pagination.Paginati
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.BookRepository.GetList(tx, page)
 		if err != nil {
-			eh.FailedGetList(logger, err, "book")
+			eh.FailedGetList(logger, err, scope)
 			return err
 		}
 		result = resultRepo
@@ -108,7 +110,7 @@ func (srv *BookService) GetList(page pagination.Pagination) (pagination.Paginati
 		return nil
 	})
 	if err != nil {
-		eh.FailedGetList(logger, err, "book")
+		eh.FailedGetList(logger, err, scope)
 		return result, err
 	}
 
@@ -125,14 +127,14 @@ func (srv *BookService) Delete(bookId uint) error {
 		logger.Info("db transaction begin")
 		err := srv.BookRepository.Delete(tx, bookId)
 		if err != nil {
-			eh.FailedDelete(logger, err, "book")
+			eh.FailedDelete(logger, err, scope)
 			return err
 		}
 		logger.Info("end of db transaction")
 		return nil
 	})
 	if err != nil {
-		eh.FailedDelete(logger, err, "book")
+		eh.FailedDelete(logger, err, scope)
 		return err
 	}
 
@@ -152,13 +154,13 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 		logger.Info("db transaction begin")
 		resultGet, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			eh.FailedGetDetail(logger, err, "book")
+			eh.FailedGetDetail(logger, err, scope)
 			return err
 		}
 		resultGet.Copier(input)
 		resultUpdate, err := srv.BookRepository.Update(tx, resultGet)
 		if err != nil {
-			eh.FailedUpdate(logger, err, "book")
+			eh.FailedUpdate(logger, err, scope)
 			return err
 		}
 		result = modelToResponse(resultUpdate)
@@ -166,7 +168,7 @@ func (srv *BookService) Update(input *mb.BookUpdateRequest, bookId uint) (*mb.Bo
 		return nil
 	})
 	if err != nil {
-		eh.FailedUpdate(logger, err, "book")
+		eh.FailedUpdate(logger, err, scope)
 		return result, err
 	}
 
@@ -183,7 +185,7 @@ func (srv *BookService) Return(bookId uint) error {
 		logger.Info("db transaction begin")
 		book, err := srv.BookRepository.GetDetail(tx, bookId)
 		if err != nil {
-			eh.FailedGetDetail(logger, err, "book")
+			eh.FailedGetDetail(logger, err, scope)
 			return err
 		}
 
@@ -192,7 +194,7 @@ func (srv *BookService) Return(bookId uint) error {
 
 		_, err = srv.BookRepository.Update(tx, book)
 		if err != nil {
-			eh.FailedUpdate(logger, err, "book")
+			eh.FailedUpdate(logger, err, scope)
 			return err
 		}
 
@@ -214,7 +216,7 @@ func (srv *BookService) Return(bookId uint) error {
 		return nil
 	})
 	if err != nil {
-		eh.FailedUpdate(logger, err, "book")
+		eh.FailedUpdate(logger, err, scope)
 		return err
 	}
 

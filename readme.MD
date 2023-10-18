@@ -95,4 +95,4 @@ go run . seeder # seeding book table
    - [x] Check Rates
 
 ## License
-Copyright (c) 2023-present [Moko](https://github.com/dpurbosakti)
+Copyright (c) 2023-present [Dwi Atmoko Purbo Sakti](https://github.com/dpurbosakti). This Project is free to use and licensed under the [MIT License](https://github.com/dpurbosakti/BookNest/blob/main/LICENSE).

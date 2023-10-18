@@ -1,8 +1,15 @@
-# BookNest
-
-![Library](https://i.imgur.com/hGaRvQ5.jpg)
+# BookNest #
 
 This project only for personal uses and education purpose..
+
+## Table of Contents
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Run](#run-the-app)
+- [Commands](#commands)
+- [API Supports](#api-supports)
+- [License](#license)
+
 
 ## Prerequisites
 
@@ -42,8 +49,10 @@ go run . serve
 **Note:** When running the application using the `go run . serve` command, make sure you are in the root directory of the cloned repository. This is the directory where the `main.go` file is located. Running the command from this directory ensures that the application is correctly started and served.
 
 
-## More Commands
+## Commands
 ```sh
+go run . serve # run the app
+go run . migrate_up #create all tables
 go run . migrate_down #drop all tables
 go run . seeder # seeding book table
 ```
@@ -85,3 +94,5 @@ go run . seeder # seeding book table
    - [x] Get List
    - [x] Check Rates
 
+## License
+Copyright (c) 2023-present [Moko](https://github.com/dpurbosakti)

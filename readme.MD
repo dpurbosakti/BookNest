@@ -47,3 +47,41 @@ go run . serve
 go run . migrate_down #drop all tables
 go run . seeder # seeding book table
 ```
+
+## API Supports
+
+- AUTH
+   - [x] Login
+   - [x] Login By Google
+   - [x] Login By Twitter
+   - [x] Login By Github
+- USERS
+   - [x] Create User
+   - [x] Verify Email
+   - [x] Refresh Verification Code 
+   - [x] Get List
+   - [x] Get Detail
+   - [x] Update
+   - [x] Delete
+- BOOKS
+   - [x] Create Book
+   - [x] Get List
+   - [x] Get Detail
+   - [x] Update
+   - [x] Delete
+   - [x] Return
+- ORDERS
+   - [x] Create Order
+   - [x] Accept
+   - [x] Reject
+   - [x] Get List
+   - [x] Get Detail
+- ADDRESS
+   - [x] Create Address
+   - [x] Get Detail
+   - [x] Update
+- COURIERS
+   - [x] Get Couriers From Biteship
+   - [x] Get List
+   - [x] Check Rates
+

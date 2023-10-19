@@ -7,6 +7,7 @@ import (
 	i "book-nest/internal/interfaces"
 	mo "book-nest/internal/models/order"
 	ch "book-nest/utils/calendarhelper"
+	eh "book-nest/utils/errorhelper"
 	"book-nest/utils/pagination"
 	"context"
 	"crypto/rand"
@@ -49,6 +50,12 @@ func NewOrderService(orderRepository i.OrderRepository, bookRepository i.BookRep
 	}
 }
 
+const (
+	userScope  = "user"
+	bookScope  = "book"
+	orderScope = "order"
+)
+
 func (srv *OrderService) Create(input *mo.OrderCreateRequest, userId uuid.UUID) (*mo.OrderResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
@@ -69,14 +76,14 @@ func (srv *OrderService) Create(input *mo.OrderCreateRequest, userId uuid.UUID) 
 		logger.WithField("data", data).Info("db transaction begin")
 		resultBook, err := srv.BookRepository.GetDetail(tx, data.BookId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get book")
+			eh.FailedGetDetail(logger, err, bookScope)
 			return err
 		}
 		data.Book = resultBook
 
 		resultUser, err := srv.UserRepository.GetDetail(tx, data.UserId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get user")
+			eh.FailedGetDetail(logger, err, userScope)
 			return err
 		}
 		data.User = resultUser
@@ -89,13 +96,13 @@ func (srv *OrderService) Create(input *mo.OrderCreateRequest, userId uuid.UUID) 
 
 		resultRepo, err := srv.OrderRepository.Create(tx, data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create order")
+			eh.FailedCreate(logger, err, orderScope)
 			return err
 		}
 
 		token, redirect_url, err = srv.Midtrans.CreatePayment(data)
 		if err != nil {
-			logger.WithError(err).Error("failed to create payment")
+			eh.FailedCreate(logger, err, "payment")
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -110,7 +117,7 @@ func (srv *OrderService) Create(input *mo.OrderCreateRequest, userId uuid.UUID) 
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create order")
+		eh.FailedCreate(logger, err, orderScope)
 		return nil, err
 	}
 
@@ -164,7 +171,7 @@ func (srv *OrderService) Update(input *mo.OrderUpdateRequest) (*mo.OrderResponse
 		logger.Info("db transaction begin")
 		resultOrder, err := srv.OrderRepository.GetDetail(tx, input.ReferenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get order data")
+			eh.FailedGetDetail(logger, err, orderScope)
 			return err
 		}
 		resultOrder.PaymentStatus = input.PaymentStatus
@@ -174,7 +181,7 @@ func (srv *OrderService) Update(input *mo.OrderUpdateRequest) (*mo.OrderResponse
 
 		resultRepo, err := srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update order")
+			eh.FailedUpdate(logger, err, orderScope)
 			return err
 		}
 
@@ -192,7 +199,7 @@ func (srv *OrderService) Update(input *mo.OrderUpdateRequest) (*mo.OrderResponse
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to create order")
+		eh.FailedUpdate(logger, err, orderScope)
 		return nil, err
 	}
 
@@ -211,7 +218,7 @@ func (srv *OrderService) Accept(ctx *gin.Context, referenceId string) error {
 		logger.Info("db transaction begin")
 		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get order data")
+			eh.FailedGetDetail(logger, err, orderScope)
 			return err
 		}
 
@@ -230,14 +237,14 @@ func (srv *OrderService) Accept(ctx *gin.Context, referenceId string) error {
 
 		_, err = srv.BookRepository.Update(tx, resultOrder.Book)
 		if err != nil {
-			logger.WithError(err).Error("failed to update book")
+			eh.FailedUpdate(logger, err, orderScope)
 			return err
 		}
 
 		resultOrder.Status = "accepted"
 		_, err = srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update order")
+			eh.FailedUpdate(logger, err, orderScope)
 			return err
 		}
 
@@ -284,7 +291,7 @@ func (srv *OrderService) Accept(ctx *gin.Context, referenceId string) error {
 	})
 
 	if err != nil {
-		logger.WithError(err).Error("failed to create order")
+		logger.WithError(err).Error("failed to accept order")
 		return err
 	}
 
@@ -303,7 +310,7 @@ func (srv *OrderService) Reject(ctx *gin.Context, referenceId string) error {
 		logger.Info("db transaction begin")
 		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get order data")
+			eh.FailedGetDetail(logger, err, orderScope)
 			return err
 		}
 
@@ -324,7 +331,7 @@ func (srv *OrderService) Reject(ctx *gin.Context, referenceId string) error {
 		resultOrder.Status = "rejected"
 		_, err = srv.OrderRepository.Update(tx, resultOrder)
 		if err != nil {
-			logger.WithError(err).Error("failed to update order")
+			eh.FailedUpdate(logger, err, orderScope)
 			return err
 		}
 
@@ -361,7 +368,7 @@ func (srv *OrderService) GetDetail(referenceId string) (*mo.OrderResponse, error
 
 		resultOrder, err := srv.OrderRepository.GetDetail(tx, referenceId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get rent data")
+			eh.FailedGetDetail(logger, err, orderScope)
 			return err
 		}
 		result = modelToResponse(resultOrder)
@@ -370,7 +377,7 @@ func (srv *OrderService) GetDetail(referenceId string) (*mo.OrderResponse, error
 		return nil
 	})
 	if err != nil {
-		logger.WithError(err).Error("failed to get detail order data")
+		eh.FailedGetDetail(logger, err, orderScope)
 		return nil, err
 	}
 
@@ -388,7 +395,7 @@ func (srv *OrderService) GetList(page pagination.Pagination) (pagination.Paginat
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.OrderRepository.GetList(tx, page)
 		if err != nil {
-			logger.WithError(err).Error("failed to get list")
+			eh.FailedGetList(logger, err, orderScope)
 			return err
 		}
 		result = resultRepo
@@ -396,7 +403,7 @@ func (srv *OrderService) GetList(page pagination.Pagination) (pagination.Paginat
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to get list")
+		eh.FailedGetList(logger, err, orderScope)
 		return result, err
 	}
 

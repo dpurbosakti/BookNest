@@ -23,6 +23,8 @@ func NewAddressService(addressRepository i.AddressRepository, db *gorm.DB) i.Add
 	}
 }
 
+const addressScope = "address"
+
 func (srv *AddressService) Create(input *mad.AddressCreateRequest) (*mad.AddressResponse, error) {
 	logger := logrus.WithFields(logrus.Fields{
 		"func":  "create",
@@ -40,7 +42,7 @@ func (srv *AddressService) Create(input *mad.AddressCreateRequest) (*mad.Address
 		logger.WithField("data", data).Info("db transaction begin")
 		resultRepo, err := srv.AddressRepository.Create(tx, data)
 		if err != nil {
-			eh.FailedCreate(logger, err, "address")
+			eh.FailedCreate(logger, err, addressScope)
 			return err
 		}
 
@@ -49,7 +51,7 @@ func (srv *AddressService) Create(input *mad.AddressCreateRequest) (*mad.Address
 		return nil
 	})
 	if err != nil {
-		eh.FailedCreate(logger, err, "address")
+		eh.FailedCreate(logger, err, addressScope)
 		return nil, err
 	}
 
@@ -67,7 +69,7 @@ func (srv *AddressService) GetDetail(addressId uint) (*mad.AddressResponse, erro
 		logger.Info("db transaction begin")
 		resultRepo, err := srv.AddressRepository.GetDetail(tx, addressId)
 		if err != nil {
-			eh.FailedGetDetail(logger, err, "address")
+			eh.FailedGetDetail(logger, err, addressScope)
 			return err
 		}
 		result = modelToResponse(resultRepo)
@@ -75,7 +77,7 @@ func (srv *AddressService) GetDetail(addressId uint) (*mad.AddressResponse, erro
 		return nil
 	})
 	if err != nil {
-		eh.FailedGetDetail(logger, err, "address")
+		eh.FailedGetDetail(logger, err, addressScope)
 		return result, err
 	}
 
@@ -95,7 +97,7 @@ func (srv *AddressService) Update(input *mad.AddressUpdateRequest, addressId uin
 		logger.Info("db transaction begin")
 		resultGet, err := srv.AddressRepository.GetDetail(tx, addressId)
 		if err != nil {
-			logger.WithError(err).Error("failed to get detail")
+			eh.FailedGetDetail(logger, err, addressScope)
 			return err
 		}
 
@@ -106,7 +108,7 @@ func (srv *AddressService) Update(input *mad.AddressUpdateRequest, addressId uin
 		resultGet.Copier(input)
 		resultUpdate, err := srv.AddressRepository.Update(tx, resultGet)
 		if err != nil {
-			logger.WithError(err).Error("failed to update data")
+			eh.FailedUpdate(logger, err, addressScope)
 			return err
 		}
 		result = modelToResponse(resultUpdate)
@@ -114,7 +116,7 @@ func (srv *AddressService) Update(input *mad.AddressUpdateRequest, addressId uin
 		return nil
 	})
 	if err != nil {
-		logger.Error("failed to update data")
+		eh.FailedUpdate(logger, err, addressScope)
 		return result, err
 	}
 

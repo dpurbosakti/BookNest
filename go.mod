@@ -14,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.16.0
 	github.com/xendit/xendit-go/v3 v3.2.0
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.17.0
 	golang.org/x/oauth2 v0.12.0
 	google.golang.org/api v0.141.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
